@@ -6,7 +6,11 @@
   height: 40vmin;
   pointer-events: none;
 }
-
+/* CSS SOBRE EL TABLERO */
+.tablero{
+  width: 40%;
+  height: 40%;
+}
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
     animation: App-logo-spin infinite 20s linear;
@@ -36,3 +40,8 @@
     transform: rotate(360deg);
   }
 }
+
+
+
+
+
