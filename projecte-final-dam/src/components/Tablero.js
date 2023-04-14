@@ -36,7 +36,7 @@ export const Tablero = () => {
 
 	function getBestMove(fen) {
 		const game = new Chess(fen);
-		const depth = 5; // profundidad de búsqueda del árbol
+		const depth = 4; // profundidad de búsqueda del árbol
 		const alpha = -Infinity;
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";
@@ -46,16 +46,33 @@ export const Tablero = () => {
 	}
 
 	function evaluateBoard() {
-		// Aquí deberías implementar tu propia función de evaluación de tablero
-		// para determinar el valor de la posición actual del juego.
-		// Podría ser tan simple como contar la diferencia en piezas entre ambos jugadores.
-		// O podrías usar un enfoque más sofisticado, como una red neuronal.
+		//TODO 1. Evaluación gradual: Es interesante variar los pesos de las funciones según la fase de juego en la que nos encontremos. 
+			/*Por ejemplo, queremos que nuestro rey esté alejado del centro en el medio juego. Sin embargo, como todos sabemos, 
+			es una pieza fundamental en los finales y mejor que esté en el centro. Para medir la fase de juego existente, 
+			los módulos pueden usar el nº de piezas sobre el tablero por ejemplo. */
+
+		//TODO 2. Pareja de alfiles: Se puede añadir un pequeño bonus por la pareja de alfiles (con la misma se cubren todas las casillas del tablero).
+
+		//TODO 3. Tablas de piezas y casillas: Son una manera simple de asignar valores a piezas específicas en casillas específicas. 
+			//Por ejemplo durante la apertura, los peones tendrán un pequeño bonus por ocupar casillas centrales.
+
+		//TODO 4. Seguridad del rey: Esto es muy importante. Por ejemplo se puede medir calculando la cantidad de peones que rodean al rey, o si hay una torre cerca del mismo.	
+
+		//TODO 5. Movilidad: Uno normalmente prefiere posiciones donde tienes más opciones, por ejemplo alfiles con diagonales abiertas, etc... 
+			//Esto se puede medir por ejemplo usando el nº de jugadas legales posibles en una posición como score para la movilidad.	
+
+		//TODO 6. Estructura de peones: Los peones doblados pueden dar un bonus negativo, 
+			//o por ejemplo los peones aislados en finales, ya que como todos sabemos son más fáciles de atacar. 
+
+		//TODO 7. Torre en columna abierta: Esto como sabemos suele ser positivo al igual que tener una torreen séptima. 
+			/*Hay muchos más factores que se pueden tener en cuenta pero estos siete resumen bien la idea de la evaluación 
+			avanzada que uno puede añadir a las funciones de evaluación. */
 
 		let whiteScore = 0;
 		let blackScore = 0;
-
+		const square = SQUARES;
+		
 		for (let i = 0; i < 64; i++) {
-			const square = SQUARES;
 			const piece = game.get(square[i]);
 
 			if (piece === null) {
@@ -71,7 +88,7 @@ export const Tablero = () => {
 				k: 0,
 			}[piece.type];
 
-			if (piece.type === "w") {
+			if (piece.color === "w") {
 				whiteScore += pieceValue;
 			} else {
 				blackScore += pieceValue;
@@ -92,6 +109,10 @@ export const Tablero = () => {
 
 		for (let i = 0; i < possibleMoves.length; i++) {
 			game.move(possibleMoves[i]);
+			//Mostrar en tablero pequeño la posición actual que se está evaluando
+			console.log(game.board);
+
+			//Evaluar siguiente posición
 			const [_, value] = minimax(depth - 1, alpha, beta, !isMaximizingPlayer);
 			game.undo();
 
