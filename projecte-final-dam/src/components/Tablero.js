@@ -40,12 +40,14 @@ export const Tablero = () => {
 
 	function getBestMove(fen) {
 		const game = new Chess(fen);
-		const depth = 3; // profundidad de búsqueda del árbol
+		const depth = 2; // profundidad de búsqueda del árbol
 		const alpha = -Infinity;
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";
 
 		const [bestMove, _] = minimax(depth, alpha, beta, isMaximizingPlayer);
+
+		console.log("bestMove: "+ bestMove +" - value: "+ _);
 		return bestMove;
 	}
 
@@ -57,26 +59,33 @@ export const Tablero = () => {
 		
 		
 		//TODO 2. Pareja de alfiles: Se puede añadir un pequeño bonus por la pareja de alfiles (con la misma se cubren todas las casillas del tablero).
+			//boolean que se ponga a true si un contador de alfiles llega a 2 y el contrario no tiene los dos.
 
 
 		//TODO 3. Tablas de piezas y casillas: Son una manera simple de asignar valores a piezas específicas en casillas específicas. 
 			//Por ejemplo durante la apertura, los peones tendrán un pequeño bonus por ocupar casillas centrales.
+			//Los peones de C a F suman +0.1 a su bando si se han avanzado en los primeros 7 movimientos.
 
 
-		//TODO 4. Seguridad del rey: Esto es muy importante. Por ejemplo se puede medir calculando la cantidad de peones que rodean al rey, o si hay una torre cerca del mismo.	
+		//TODO 4. Seguridad del rey: Esto es muy importante. 
+			//Por ejemplo se puede medir calculando la cantidad de peones que rodean al rey, o si hay una torre cerca del mismo.	
+			//Sumar +0.2 si 3 peones estan maximo a dos casillas de rey. +0.2 si hay una torre a 3 casillas del rey, +0.1 por otras piezas. 
+			//FUNCION (GetNearbyPieces())(Buscar forma de comprobar si hay piezas alrededor del rey, serviria para cualquier otra pieza)
 
 
 		//TODO 5. Movilidad: Uno normalmente prefiere posiciones donde tienes más opciones, por ejemplo alfiles con diagonales abiertas, etc... 
-			//Esto se puede medir por ejemplo usando el nº de jugadas legales posibles en una posición como score para la movilidad.	
+			//!!!MuybuenaIdea xD ---> Esto se puede medir por ejemplo usando el nº de jugadas legales posibles en una posición como score para la movilidad.
 
 
-		//TODO 6. Estructura de peones: Los peones doblados pueden dar un bonus negativo, 
+		//TODO 6. Estructura de peones: Los peones doblados pueden dar un bonus negativo, (-0.2) 
 			//o por ejemplo los peones aislados en finales, ya que como todos sabemos son más fáciles de atacar. 
 
 
-		//TODO 7. Torre en columna abierta: Esto como sabemos suele ser positivo al igual que tener una torreen séptima. 
-			/*Hay muchos más factores que se pueden tener en cuenta pero estos siete resumen bien la idea de la evaluación 
-			avanzada que uno puede añadir a las funciones de evaluación. */
+		//TODO 7. Torre en columna abierta: Esto como sabemos suele ser positivo al igual que tener una torre en séptima. 
+			//+0.2 por torre en columna abierta, +0.2 extra si está en 7a.
+
+		//TODO 8. Tener la dama centralizada a partir de la jugada 9.
+
 
 		let whiteScore = 0;
 		let blackScore = 0;
@@ -99,13 +108,17 @@ export const Tablero = () => {
 			}[piece.type];
 
 			/*switch (piece.type) {
-				case value:
+				case "":
 					
 					break;
 			
 				default:
 					break;
 			}*/
+
+			if(piece.type == "k"){
+				console.log(getNearbyPieces(square[i], 2));
+			}
 
 			if (piece.color === "w") {
 				whiteScore += pieceValue;
@@ -114,6 +127,7 @@ export const Tablero = () => {
 			}
 		}
 
+		console.log(whiteScore+" - "+blackScore);
 		return whiteScore - blackScore;
 	}
 
@@ -129,7 +143,7 @@ export const Tablero = () => {
 		for (let i = 0; i < possibleMoves.length; i++) {
 			game.move(possibleMoves[i]);
 			//Mostrar en tablero pequeño la posición actual que se está evaluando
-			console.log(game.ascii());
+			//console.log(game.ascii());
 
 			//Evaluar siguiente posición
 			const [_, value] = minimax(depth - 1, alpha, beta, !isMaximizingPlayer);
@@ -152,10 +166,38 @@ export const Tablero = () => {
 			if (alpha >= beta) {
 				break;
 			}
-		}
-
+		}		
 		return [bestMove, bestMoveValue];
 	}
+
+	function getNearbyPieces(piecePosition, range) {
+		// Obtener las coordenadas de la casilla en la que se encuentra la pieza que deseas examinar
+		var square = piecePosition;
+		var coords = getSquareCoords(square);
+		console.log(coords);
+
+		// Crear un array para almacenar las piezas adyacentes
+		var nearbyPieces = [];
+
+		// Examinar las casillas adyacentes a la pieza en un rango determinado
+		for (var row = coords[0] - range; row <= coords[0] + range; row++) {
+			for (var col = coords[1] - range; col <= coords[1] + range; col++) {
+				if (game.get(row+col)) {
+					var piece = game.getPiece([row, col]);
+					if (piece) {
+						nearbyPieces.push(piece);
+					}
+				}
+			}
+		}
+	}
+
+	function getSquareCoords(square) {
+		var fila = square[1];
+		var columna = square[0];
+		console.log(square)
+		return [columna, fila];
+	  }
 
 	return <Chessboard className="tablero" position={game.fen()} onPieceDrop={onDrop} />;
 }
