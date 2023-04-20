@@ -7,13 +7,14 @@ export const Tablero = () => {
 
 	const [game, setGame] = useState(new Chess());
 	var numMovements;
+	var bool = true;
 
 	function makeAMove(move) {
 		const gameCopy = { ...game };
 		//Por aquí debería haber una función que ponga colorines a los movimientos.
 		const result = gameCopy.move(move);
 		numMovements = game.history().length / 2;
-		console.log(numMovements);
+		//console.log(numMovements);
 		setGame(gameCopy);
 		return result; // null if the move was illegal, the move object if the move was legal
 	}
@@ -40,7 +41,7 @@ export const Tablero = () => {
 
 	function getBestMove(fen) {
 		const game = new Chess(fen);
-		const depth = 2; // profundidad de búsqueda del árbol
+		const depth = 1; // profundidad de búsqueda del árbol
 		const alpha = -Infinity;
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";
@@ -116,9 +117,11 @@ export const Tablero = () => {
 					break;
 			}*/
 
-			if(piece.type == "k"){
-				console.log(getNearbyPieces(square[i], 2));
-			}
+			//TODO Se supone que esto controlará las piezas que hay alrededor del rey para sumar algunas décimas por piezas cerca.
+			/*if(bool){
+				console.log(getNearbyPieces("a1", 1));
+				bool = false;
+			}*/
 
 			if (piece.color === "w") {
 				whiteScore += pieceValue;
@@ -127,7 +130,7 @@ export const Tablero = () => {
 			}
 		}
 
-		console.log(whiteScore+" - "+blackScore);
+		//console.log(whiteScore+" - "+blackScore);
 		return whiteScore - blackScore;
 	}
 
@@ -170,34 +173,73 @@ export const Tablero = () => {
 		return [bestMove, bestMoveValue];
 	}
 
-	function getNearbyPieces(piecePosition, range) {
+	/*function getNearbyPieces(piecePosition, range) {
 		// Obtener las coordenadas de la casilla en la que se encuentra la pieza que deseas examinar
-		var square = piecePosition;
-		var coords = getSquareCoords(square);
-		console.log(coords);
-
+		var coords = piecePosition;
+		console.log(game.get(coords));
 		// Crear un array para almacenar las piezas adyacentes
 		var nearbyPieces = [];
+		var positionReaded = [];
+		var positionSelected = [];
 
 		// Examinar las casillas adyacentes a la pieza en un rango determinado
-		for (var row = coords[0] - range; row <= coords[0] + range; row++) {
-			for (var col = coords[1] - range; col <= coords[1] + range; col++) {
-				if (game.get(row+col)) {
-					var piece = game.getPiece([row, col]);
-					if (piece) {
-						nearbyPieces.push(piece);
+		var aux1, aux2;
+		var row = ((aux1 = getNumByLetter(piecePosition[0]) - range) >= 0) ? aux1 : 1;
+		var col = ((aux2 = piecePosition[1] - range) <= 8 ) ? aux2 : 8;
+		for (row; row <= (getNumByLetter(coords[0]) + range) && row >= 1 && row <= 8; row++) {
+			console.log("Row: "+row);
+			for (col; col <= (parseInt(coords[1]) + range) && col >= 1 && col <= 8; col++) {
+				console.log("Row: "+getLetterByNum(row));
+				coords = getLetterByNum(row)+col;
+
+				console.log("Coords: "+coords);
+			
+				//console.log("Coords: "+coords);
+				positionReaded.push(coords);
+				if(coords != piecePosition){
+					if (game.get(coords)) {
+						var piece = game.get(coords);
+						if (piece) {
+							nearbyPieces.push(piece);
+							positionSelected.push(coords);
+						}
 					}
 				}
+				console.log("Ask: "+(col <= (parseInt(coords[1]) + range) && col >= 1 && col <= 8));
 			}
-		}
-	}
+		}		
+		console.log(positionReaded);
+		console.log(positionSelected);
+		return nearbyPieces;
+	}*/
 
-	function getSquareCoords(square) {
-		var fila = square[1];
-		var columna = square[0];
-		console.log(square)
-		return [columna, fila];
-	  }
+	function getNumByLetter(letter){
+		const letterMap = {
+			'a': 1,
+			'b': 2,
+			'c': 3,
+			'd': 4,
+			'e': 5,
+			'f': 6,
+			'g': 7,
+			'h': 8
+		};		  
+		return letterMap[letter];
+	}
+	
+	function getLetterByNum(num) {
+		const numMap = {
+		  1: 'a',
+		  2: 'b',
+		  3: 'c',
+		  4: 'd',
+		  5: 'e',
+		  6: 'f',
+		  7: 'g',
+		  8: 'h'
+		};		
+		return numMap[num];
+	}
 
 	return <Chessboard className="tablero" position={game.fen()} onPieceDrop={onDrop} />;
 }
