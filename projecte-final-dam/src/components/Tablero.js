@@ -6,7 +6,7 @@ import { Chessboard } from "react-chessboard";
 export const Tablero = () => {
 
 	const [game, setGame] = useState(new Chess());
-	var numMovements;
+	var numMovements, executionTime = 0;
 	var bool = true;
 
 	function makeAMove(move) {
@@ -35,7 +35,7 @@ export const Tablero = () => {
 
 		// illegal move
 		if (move === null) return false;
-		setTimeout(makeBestMove, 200);
+		makeBestMove();
 		return true;
 	}
 
@@ -46,8 +46,11 @@ export const Tablero = () => {
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";
 
+		console.time('loop'); 
 		const [bestMove, _] = minimax(depth, alpha, beta, isMaximizingPlayer);
-
+		console.timeEnd('loop');
+		//console.log("Media Tiempo Ejecución: "+executionTime/num);
+ 
 		console.log("bestMove: "+ bestMove +" - value: "+ _);
 		return bestMove;
 	}
@@ -141,22 +144,11 @@ export const Tablero = () => {
 		let bestMove = null;
 		let bestMoveValue = isMaximizingPlayer ? -Infinity : Infinity;
 		const possibleMoves = game.moves();
-    
-		// Ordenamos los movimientos de mayor a menor valor heurístico
-		const orderedMoves = possibleMoves.sort((move1, move2) => {
-			game.move(move1);
-			const value1 = evaluateBoard(game.board());
-			game.undo();
+		var iterations = (possibleMoves.length > 16) ? ((possibleMoves.length > 27) ? possibleMoves.length/3 : possibleMoves.length/2) : possibleMoves.length;
+		const randomMoves = shuffle(possibleMoves).slice(0, iterations);
 
-			game.move(move2);
-			const value2 = evaluateBoard(game.board());
-			game.undo();
-
-			return isMaximizingPlayer ? value2 - value1 : value1 - value2;
-		});
-
-		for (let i = 0; i < orderedMoves.length; i++) {
-			game.move(orderedMoves[i]);
+		for (let i = 0; i < randomMoves.length; i++) {
+			game.move(randomMoves[i]);
 			//Mostrar en tablero pequeño la posición actual que se está evaluando
 			//console.log(game.ascii());
 
@@ -167,13 +159,13 @@ export const Tablero = () => {
 			if (isMaximizingPlayer) {
 				if (value > bestMoveValue) {
 					bestMoveValue = value;
-					bestMove = orderedMoves[i];
+					bestMove = randomMoves[i];
 				}
 				alpha = Math.max(alpha, value);
 			} else {
 				if (value < bestMoveValue) {
 					bestMoveValue = value;
-					bestMove = orderedMoves[i];
+					bestMove = randomMoves[i];
 				}
 				beta = Math.min(beta, value);
 			}
@@ -185,10 +177,18 @@ export const Tablero = () => {
 		return [bestMove, bestMoveValue];
 	}
 
+	function shuffle(array) {
+		const copy = [...array];
+		for (let i = copy.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			[copy[i], copy[j]] = [copy[j], copy[i]];
+		}
+		return copy;
+	}
+
 	function getNearbyPieces(piecePosition, range) {
 		// Obtener las coordenadas de la casilla en la que se encuentra la pieza que deseas examinar
 		var coords = piecePosition;
-		console.log("piecePosition:", piecePosition, "range:", range);
 
 		// Crear un array para almacenar las piezas adyacentes
 		var nearbyPieces = [];
@@ -198,24 +198,16 @@ export const Tablero = () => {
 		// Examinar las casillas adyacentes a la pieza en un rango determinado
 		var aux1, aux2;
 		var row, col;
-		console.log("row:", row, "col:", col);
-		console.log("coords: "+coords);
 
 		for (row = ((aux1 = piecePosition[1] - range) > 0 ) ? aux1 : 1; row <= (parseInt(piecePosition[1]) + range); row++) {
-			console.log("row: "+row);
-			console.log("parseInt(piecePosition[1]): "+parseInt(piecePosition[1]));
 
 			for (col = ((aux2 = getNumByLetter(piecePosition[0]) - range) > 0) ? aux2 : 1; col <= (getNumByLetter(piecePosition[0]) + range); col++) {
-				console.log("col: "+col);
-				console.log("getNumByLetter(piecePosition[0]): "+getNumByLetter(piecePosition[0]));
-
 				coords = getLetterByNum(col)+row;
 				positionReaded.push(coords);
-				console.log("Checking position: ", coords);
+
 				if(coords != piecePosition){
 					if (game.get(coords)) {
 						var piece = game.get(coords);
-						console.log("Piece found: ", piece);
 						if (piece) {
 							nearbyPieces.push(piece);
 							positionSelected.push(coords);
@@ -223,10 +215,7 @@ export const Tablero = () => {
 					}
 				}
 			}
-		}		
-		console.log("Position Readed: ", positionReaded);
-		console.log("Position Selected: ", positionSelected);
-		console.log("Nearby Pieces: ", nearbyPieces);
+		}
 		return nearbyPieces;
 }
 
