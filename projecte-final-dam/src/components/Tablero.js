@@ -41,7 +41,7 @@ export const Tablero = () => {
 
 	function getBestMove(fen) {
 		const game = new Chess(fen);
-		const depth = 1; // profundidad de búsqueda del árbol
+		const depth = 5; // profundidad de búsqueda del árbol
 		const alpha = -Infinity;
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";
@@ -118,11 +118,10 @@ export const Tablero = () => {
 			}*/
 
 			//TODO Se supone que esto controlará las piezas que hay alrededor del rey para sumar algunas décimas por piezas cerca.
-			/*if(bool){
-				console.log(getNearbyPieces("a1", 1));
+			if(bool){
+				getNearbyPieces("e1", 1);
 				bool = false;
-			}*/
-
+			}
 			if (piece.color === "w") {
 				whiteScore += pieceValue;
 			} else {
@@ -142,9 +141,22 @@ export const Tablero = () => {
 		let bestMove = null;
 		let bestMoveValue = isMaximizingPlayer ? -Infinity : Infinity;
 		const possibleMoves = game.moves();
+    
+		// Ordenamos los movimientos de mayor a menor valor heurístico
+		const orderedMoves = possibleMoves.sort((move1, move2) => {
+			game.move(move1);
+			const value1 = evaluateBoard(game.board());
+			game.undo();
 
-		for (let i = 0; i < possibleMoves.length; i++) {
-			game.move(possibleMoves[i]);
+			game.move(move2);
+			const value2 = evaluateBoard(game.board());
+			game.undo();
+
+			return isMaximizingPlayer ? value2 - value1 : value1 - value2;
+		});
+
+		for (let i = 0; i < orderedMoves.length; i++) {
+			game.move(orderedMoves[i]);
 			//Mostrar en tablero pequeño la posición actual que se está evaluando
 			//console.log(game.ascii());
 
@@ -155,13 +167,13 @@ export const Tablero = () => {
 			if (isMaximizingPlayer) {
 				if (value > bestMoveValue) {
 					bestMoveValue = value;
-					bestMove = possibleMoves[i];
+					bestMove = orderedMoves[i];
 				}
 				alpha = Math.max(alpha, value);
 			} else {
 				if (value < bestMoveValue) {
 					bestMoveValue = value;
-					bestMove = possibleMoves[i];
+					bestMove = orderedMoves[i];
 				}
 				beta = Math.min(beta, value);
 			}
@@ -173,10 +185,11 @@ export const Tablero = () => {
 		return [bestMove, bestMoveValue];
 	}
 
-	/*function getNearbyPieces(piecePosition, range) {
+	function getNearbyPieces(piecePosition, range) {
 		// Obtener las coordenadas de la casilla en la que se encuentra la pieza que deseas examinar
 		var coords = piecePosition;
-		console.log(game.get(coords));
+		console.log("piecePosition:", piecePosition, "range:", range);
+
 		// Crear un array para almacenar las piezas adyacentes
 		var nearbyPieces = [];
 		var positionReaded = [];
@@ -184,34 +197,38 @@ export const Tablero = () => {
 
 		// Examinar las casillas adyacentes a la pieza en un rango determinado
 		var aux1, aux2;
-		var row = ((aux1 = getNumByLetter(piecePosition[0]) - range) >= 0) ? aux1 : 1;
-		var col = ((aux2 = piecePosition[1] - range) <= 8 ) ? aux2 : 8;
-		for (row; row <= (getNumByLetter(coords[0]) + range) && row >= 1 && row <= 8; row++) {
-			console.log("Row: "+row);
-			for (col; col <= (parseInt(coords[1]) + range) && col >= 1 && col <= 8; col++) {
-				console.log("Row: "+getLetterByNum(row));
-				coords = getLetterByNum(row)+col;
+		var row, col;
+		console.log("row:", row, "col:", col);
+		console.log("coords: "+coords);
 
-				console.log("Coords: "+coords);
-			
-				//console.log("Coords: "+coords);
+		for (row = ((aux1 = piecePosition[1] - range) > 0 ) ? aux1 : 1; row <= (parseInt(piecePosition[1]) + range); row++) {
+			console.log("row: "+row);
+			console.log("parseInt(piecePosition[1]): "+parseInt(piecePosition[1]));
+
+			for (col = ((aux2 = getNumByLetter(piecePosition[0]) - range) > 0) ? aux2 : 1; col <= (getNumByLetter(piecePosition[0]) + range); col++) {
+				console.log("col: "+col);
+				console.log("getNumByLetter(piecePosition[0]): "+getNumByLetter(piecePosition[0]));
+
+				coords = getLetterByNum(col)+row;
 				positionReaded.push(coords);
+				console.log("Checking position: ", coords);
 				if(coords != piecePosition){
 					if (game.get(coords)) {
 						var piece = game.get(coords);
+						console.log("Piece found: ", piece);
 						if (piece) {
 							nearbyPieces.push(piece);
 							positionSelected.push(coords);
 						}
 					}
 				}
-				console.log("Ask: "+(col <= (parseInt(coords[1]) + range) && col >= 1 && col <= 8));
 			}
 		}		
-		console.log(positionReaded);
-		console.log(positionSelected);
+		console.log("Position Readed: ", positionReaded);
+		console.log("Position Selected: ", positionSelected);
+		console.log("Nearby Pieces: ", nearbyPieces);
 		return nearbyPieces;
-	}*/
+}
 
 	function getNumByLetter(letter){
 		const letterMap = {
