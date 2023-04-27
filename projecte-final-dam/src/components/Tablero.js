@@ -6,25 +6,23 @@ import { Chessboard } from "react-chessboard";
 export const Tablero = () => {
 
 	const [game, setGame] = useState(new Chess());
+	const gamePhase = 
+	{
+		//Consideramos fase inicial hasta el movimiento 12 incluído.
+		Initial: 13,
+		//Consideramos fase medio juego a partir del movimiento 13 y durará hasta que queden <17 piezas.
+		Intermediate: 17,
+		//Consideramos fase final <17 piezas.
+		Final: 16
+	};
+	function consultPhase() {
+		/*if(numMovements < gamePhase.Initial){
+			return 0; //Initial
+		}else if()*/
+	}
+
 	var numMovements, executionTime = 0;
 	var bool = true;
-
-	function makeAMove(move) {
-		const gameCopy = { ...game };
-		//Por aquí debería haber una función que ponga colorines a los movimientos.
-		const result = gameCopy.move(move);
-		numMovements = game.history().length / 2;
-		//console.log(numMovements);
-		setGame(gameCopy);
-		return result; // null if the move was illegal, the move object if the move was legal
-	}
-
-	function makeBestMove() {
-		const bestMove = getBestMove(game.fen());
-		if (bestMove) {
-			makeAMove(bestMove);
-		}
-	}
 
 	function onDrop(sourceSquare, targetSquare) {
 		const move = makeAMove({
@@ -38,6 +36,14 @@ export const Tablero = () => {
 		makeBestMove();
 		return true;
 	}
+
+	function makeBestMove() {
+		const bestMove = getBestMove(game.fen());
+		if (bestMove) {
+			makeAMove(bestMove);
+		}
+	}
+
 
 	function getBestMove(fen) {
 		const game = new Chess(fen);
@@ -55,11 +61,23 @@ export const Tablero = () => {
 		return bestMove;
 	}
 
+	function makeAMove(move) {
+		const gameCopy = { ...game };
+		//Por aquí debería haber una función que ponga colorines a los movimientos.
+		const result = gameCopy.move(move);
+		numMovements = game.history().length / 2;
+		setGame(gameCopy);
+		return result; // null if the move was illegal, the move object if the move was legal
+	}
+
 	function evaluateBoard() {
 		//TODO 1. Evaluación gradual: Es interesante variar los pesos de las funciones según la fase de juego en la que nos encontremos. 
 			/*Por ejemplo, queremos que nuestro rey esté alejado del centro en el medio juego. Sin embargo, como todos sabemos, 
 			es una pieza fundamental en los finales y mejor que esté en el centro. Para medir la fase de juego existente, 
 			los módulos pueden usar el nº de piezas sobre el tablero por ejemplo. */
+			//Consideramos fase inicial hasta el movimiento 12 incluído.
+			//Consideramos fase medio juego a partir del movimiento 13 y durará hasta que queden <17 piezas.
+			//Consideramos fase final <17 piezas.
 		
 		
 		//TODO 2. Pareja de alfiles: Se puede añadir un pequeño bonus por la pareja de alfiles (con la misma se cubren todas las casillas del tablero).
@@ -132,7 +150,6 @@ export const Tablero = () => {
 			}
 		}
 
-		//console.log(whiteScore+" - "+blackScore);
 		return whiteScore - blackScore;
 	}
 
