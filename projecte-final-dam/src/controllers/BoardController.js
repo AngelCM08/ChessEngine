@@ -2,6 +2,16 @@ import { SQUARES } from "chess.js";
 
 let game;
 
+const gamePhase = 
+{
+    //Consideramos fase inicial hasta el movimiento 12 incluído.
+    Initial: 13,
+    //Consideramos fase medio juego a partir del movimiento 13 y durará hasta que queden <17 piezas.
+    Intermediate: 17,
+    //Consideramos fase final <17 piezas.
+    Final: 16
+};
+
 export class BoardController {
     constructor(setGame) {
         game = setGame;
@@ -200,5 +210,11 @@ export class BoardController {
 		  8: 'h'
 		};		
 		return numMap[num];
+	}
+    
+	consultPhase() {
+		/*if(numMovements < gamePhase.Initial){
+			return 0; //Initial
+		}else if()*/
 	}
 }
