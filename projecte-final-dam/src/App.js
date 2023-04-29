@@ -9,9 +9,6 @@ function App() {
         <h1>TEST</h1>
         <div className='tablero'>
           <Board/>
-        </div><br></br>
-        <div className='tablero'>
-          <ModuleBoard/>
         </div>
       </header>
     </div>

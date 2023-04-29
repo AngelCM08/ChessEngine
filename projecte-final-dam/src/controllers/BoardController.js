@@ -1,16 +1,7 @@
 import { SQUARES } from "chess.js";
+import * as constants from "../Constants.js";
 
 let game;
-
-const gamePhase = 
-{
-    //Consideramos fase inicial hasta el movimiento 12 incluído.
-    Initial: 13,
-    //Consideramos fase medio juego a partir del movimiento 13 y durará hasta que queden <17 piezas.
-    Intermediate: 17,
-    //Consideramos fase final <17 piezas.
-    Final: 16
-};
 
 export class BoardController {
     constructor(setGame) {
@@ -29,7 +20,7 @@ export class BoardController {
 
 		//TODO 3. Tablas de piezas y casillas: Son una manera simple de asignar valores a piezas específicas en casillas específicas. 
 			//Por ejemplo durante la apertura, los peones tendrán un pequeño bonus por ocupar casillas centrales.
-			//Los peones de C a F suman +0.1 a su bando si se han avanzado en los primeros 7 movimientos.
+			//El rey en la fase final no entra a evaluar su posicion a partir de la tabla.
 
 
 		//TODO 4. Seguridad del rey: Esto es muy importante. 
@@ -72,14 +63,7 @@ export class BoardController {
 				k: 0,
 			}[piece.type];
 
-			/*switch (piece.type) {
-				case "":
-					
-					break;
-			
-				default:
-					break;
-			}*/
+			var bonusValue = this.evaluateBonus(piece, square[i]);
 
 			//TODO Se supone que esto controlará las piezas que hay alrededor del rey para sumar algunas décimas por piezas cerca.
 			/*if(bool){
@@ -87,15 +71,36 @@ export class BoardController {
 				bool = false;
 			}*/
 			if (piece.color === "w") {
-				whiteScore += pieceValue;
+				whiteScore += pieceValue + bonusValue;
 			} else {
-				blackScore += pieceValue;
+				blackScore += pieceValue + bonusValue;
 			}
 		}
 
 		//console.log(whiteScore+" - "+blackScore);
 		return whiteScore - blackScore;
 	}
+
+	evaluateBonus(piece, square) {
+		if (piece === null) {
+			return 0;
+		}
+
+		var absoluteValue = this.getAbsoluteValue(piece.type, piece.color === 'w', (this.getNumByLetter(square[0])-1), square[1]-1);
+		return piece.color === 'w' ? absoluteValue : -absoluteValue;
+	};	
+
+	getAbsoluteValue(type, isWhite, x ,y) {
+		switch (type) {
+			case 'p': return (isWhite ? constants.pawnEvalWhite[y][x] : constants.pawnEvalBlack[y][x]);
+			case 'r': return (isWhite ? constants.rookEvalWhite[y][x] : constants.rookEvalBlack[y][x]);
+			case 'n': return constants.knightEval[y][x];
+			case 'b': return (isWhite ? constants.bishopEvalWhite[y][x] : constants.bishopEvalBlack[y][x]);
+			case 'q': return constants.evalQueen[y][x];
+			case 'k': return (isWhite ? constants.kingEvalWhite[y][x] : constants.kingEvalBlack[y][x]);
+			default: return 0;
+		  }
+	};
 
 	minimax(depth, alpha, beta, isMaximizingPlayer) {
 		if (depth === 0 || game.game_over()) {
