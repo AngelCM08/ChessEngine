@@ -5,7 +5,7 @@ Que sólo tenga la parte de mostrar info, y tener en otro archivo toda la lógic
 
 - [ ] Implementar el tablero con los movimientos que piensa el módulo.
 
-evaluateBoard():
+## evaluateBoard():
 - [ ] Evaluación gradual:
 Es interesante variar los pesos de las funciones según la fase de juego en la que nos encontremos. Por ejemplo, queremos que nuestro rey esté alejado del centro en el medio juego. Sin embargo, como todos sabemos, es una pieza fundamental en los finales y mejor que esté en el centro. Para medir la fase de juego existente, los módulos pueden usar el nº de piezas sobre el tablero por ejemplo.
 
@@ -27,10 +27,13 @@ Esto suele ser positivo al igual que tener una torre en séptima.
 - [X] Alfil en diagonales amplias y abiertas: 
 Esto suele ser positivo.
 
-Diseño general:
+## Diseño general:
 - [ ] Situar los tres bloques principales + header: 
 Tablero, tablero de módulo y pestañas de información/configuración de módulo.
 
-Diseño del tablero principal
+## Diseño del tablero principal
 - [ ] Highlight de los últimos movimientos: 
 Aprovechar la libreria chessboard.js para añadir esta funcionalidad.
+
+## Optimización en React
+- [ ] Optimización...

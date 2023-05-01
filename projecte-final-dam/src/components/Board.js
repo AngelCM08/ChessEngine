@@ -8,7 +8,7 @@ export const Board = () => {
 	const [game, setGame] = useState(new Chess());
 	const boardController = new BoardController(game);
 	
-	var numMovements, executionTime = 0;
+	var numMovements;
 
 	function onDrop(sourceSquare, targetSquare) {
 		const move = makeAMove({
@@ -19,18 +19,19 @@ export const Board = () => {
 
 		// illegal move
 		if (move === null) return false;		
-		setTimeout(makeBestMove, 200);
+		setTimeout(makeBestMove, 200); //Needed timeout to charge correctly the movement of the piece.
 		return true;
 	}
 
 	function makeAMove(move) {
 		const gameCopy = { ...game };
-		//Por aquí debería haber una función que ponga colorines a los movimientos.
+
+		/********Por aquí debería haber una función que ponga colorines a los movimientos.*********/
+
 		const result = gameCopy.move(move);
 		numMovements = game.history().length / 2;
-		//console.log(numMovements);
 		setGame(gameCopy);
-		return result; // null if the move was illegal, the move object if the move was legal
+		return result; //null if the move was illegal, the move object if the move was legal
 	}
 
 	function makeBestMove() {
@@ -42,16 +43,16 @@ export const Board = () => {
 
 	function getBestMove(fen) {
 		const game = new Chess(fen);
-		const depth = 6; // profundidad de búsqueda del árbol
+		const depth = 6; //Depth from the research tree
 		const alpha = -Infinity;
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";
 
 		console.time('loop'); 
 		const [bestMove, _] = boardController.minimax(depth, alpha, beta, isMaximizingPlayer);
-		console.timeEnd('loop');
+		console.timeEnd('loop'); //Calculation of the time spent to process the movement done.
  
-		console.log("bestMove: "+ bestMove +" - value: "+ _);
+		//console.log("bestMove: "+ bestMove +" - value: "+ _);
 		return bestMove;
 	}
 

@@ -25,7 +25,7 @@ export class BoardController {
 				b: 3,
 				r: 5,
 				q: 9,
-				k: 0,
+				k: 900,
 			}[piece.type];
 			
 			var bonusValue = this.evaluateBonus(piece, square[i]);
@@ -36,8 +36,6 @@ export class BoardController {
 				blackScore += pieceValue + bonusValue;
 			}
 		}
-
-		//console.log(whiteScore+" - "+blackScore);
 		return whiteScore - blackScore;
 	}
 
@@ -63,7 +61,6 @@ export class BoardController {
 				return bonus + (isWhite ? constants.bishopEvalWhite[y][x] : constants.bishopEvalBlack[y][x]);
 			case 'q': return constants.evalQueen[y][x];
 			case 'k': 				
-				//Controlar las piezas alrededor del rey para sumar algunas décimas por piezas cerca.
 				bonus = this.getNearbyPieces(x+1, y+1, 2);
 				return bonus + (isWhite ? constants.kingEvalWhite[y][x] : constants.kingEvalBlack[y][x]);
 			default: return 0;
@@ -79,18 +76,18 @@ export class BoardController {
 		let bestMoveValue = isMaximizingPlayer ? -Infinity : Infinity;
 		const possibleMoves = game.moves();
 		
-		//Si la cantidad de movimientos posibles es superior a 16 y menor que 27 se dividen entre 2, si es superior a 27 se divide entre 3 y si es menor a 16 se cogen todos los movimientos posibles.
-		//Esto se hace para simplificar el cálculo de la mejor posición ya que la cantidad de cálculos és demasiado grande y el programa no está lo suficientemente optimizado.
-		//No se conseguirá siempre el mejor movimiento, pero si un cálculo de una posición relativamente buena.
+		/*If the quantity of legal movements is above 27 they are divided by 3, if it is between 16(not included) and 27(included) they are divided by 2 and if it is under 16(included) they are not divided.
+		This is done to simplify calculation for the best move because the quantity of movements is enormous and is so difficult to optimize the application.
+		It is not possible to always get the best move, but it has a not that bad move in a faster time. */
 		var iterations = (possibleMoves.length > 16) ? ((possibleMoves.length > 27) ? possibleMoves.length/3 : possibleMoves.length/2) : possibleMoves.length;
 		const randomMoves = this.shuffle(possibleMoves).slice(0, iterations);
 
 		for (let i = 0; i < randomMoves.length; i++) {
 			game.move(randomMoves[i]);
-			//Mostrar en tablero pequeño la posición actual que se está evaluando
+			//Show by console the movements that are being calculated.
 			//console.log(game.ascii());
 
-			//Evaluar siguiente posición
+			//Evaluate next position
 			const [_, value] = this.minimax(depth - 1, alpha, beta, !isMaximizingPlayer);
 			game.undo();
 
@@ -125,28 +122,23 @@ export class BoardController {
 	}
 
 	getNearbyPieces(x, y, range) {
-		// Obtener las coordenadas de la casilla en la que se encuentra la pieza que deseas examinar
+		// Get coords of the piece that it wants to examine.
 		var piecePosition = this.getLetterByNum(y)+x;
 		var coords = piecePosition;
-
-		// Crear un array para almacenar las piezas adyacentes
 		var nearbyPieces = [];
 		var positionReaded = [];
 		var positionSelected = [];
-
-		// Examinar las casillas adyacentes a la pieza en un rango determinado
-		var aux1, aux2;
-		var row, col;
+		var aux1, aux2, row, col;
 
 		for (row = ((aux1 = x - range) > 0 ) ? aux1 : 1; row <= (x + range); row++) {
-
 			for (col = ((aux2 = y - range) > 0) ? aux2 : 1; col <= y + range; col++) {
 				coords = this.getLetterByNum(col)+row;
 				positionReaded.push(coords);
 
 				if(coords !== piecePosition){
 					if (game.get(coords)) {
-						var piece = game.get(coords);						
+						var piece = game.get(coords);	
+											
 						if (piece) {
 							nearbyPieces.push(piece);
 							positionSelected.push(coords);
@@ -159,13 +151,13 @@ export class BoardController {
     }
 
 	isKingSafe(nearbyPieces) {
-		var cont=0, rockNear, bonus=0;
+		var counter=0, rockNear, bonus=0;
 		nearbyPieces.forEach(piece => {
-			if(piece.type === 'p') cont++;
+			if(piece.type === 'p') counter++;
 			if(piece.type === 'r') rockNear = true;
 		});
 		if(rockNear) bonus += 0.2;
-		if(cont === 3) bonus += 0.3;
+		if(counter === 3) bonus += 0.3;
 		return bonus; 
 	}
 
