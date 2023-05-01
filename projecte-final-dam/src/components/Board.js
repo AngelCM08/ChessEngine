@@ -7,7 +7,7 @@ import { BoardController } from "../controllers/BoardController";
 export const Board = () => {
 	const [game, setGame] = useState(new Chess());
 	const boardController = new BoardController(game);
-
+	
 	var numMovements, executionTime = 0;
 
 	function onDrop(sourceSquare, targetSquare) {

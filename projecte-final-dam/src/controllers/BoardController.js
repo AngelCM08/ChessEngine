@@ -5,42 +5,34 @@ let game;
 
 export class BoardController {
     constructor(setGame) {
-        game = setGame;
+        game = setGame;		
     }
     evaluateBoard() {
 		//TODO 1. Evaluación gradual: Es interesante variar los pesos de las funciones según la fase de juego en la que nos encontremos. 
 			/*Por ejemplo, queremos que nuestro rey esté alejado del centro en el medio juego. Sin embargo, como todos sabemos, 
 			es una pieza fundamental en los finales y mejor que esté en el centro. Para medir la fase de juego existente, 
-			los módulos pueden usar el nº de piezas sobre el tablero por ejemplo. */
-		
+			los módulos pueden usar el nº de piezas sobre el tablero por ejemplo. */		
 		
 		//TODO 2. Pareja de alfiles: Se puede añadir un pequeño bonus por la pareja de alfiles (con la misma se cubren todas las casillas del tablero).
 			//boolean que se ponga a true si un contador de alfiles llega a 2. Siempre suma, y dejará de sumar cuando uno de los dos bandos pierda la pareja.
 
-
 		//TODO 3. Tablas de piezas y casillas: Son una manera simple de asignar valores a piezas específicas en casillas específicas. 
 			//Por ejemplo durante la apertura, los peones tendrán un pequeño bonus por ocupar casillas centrales.
-			//El rey en la fase final no entra a evaluar su posicion a partir de la tabla.
-
+			//******El rey en la fase final no entra a evaluar su posicion a partir de la tabla.******
 
 		//TODO 4. Seguridad del rey: Esto es muy importante. 
 			//Por ejemplo se puede medir calculando la cantidad de peones que rodean al rey, o si hay una torre cerca del mismo.	
 			//Sumar +0.2 si 3 peones estan maximo a dos casillas de rey. +0.2 si hay una torre a 3 casillas del rey, +0.1 por otras piezas. 
 			//FUNCION (GetNearbyPieces())(Buscar forma de comprobar si hay piezas alrededor del rey, serviria para cualquier otra pieza)
 
-
 		//TODO 5. Movilidad: Uno normalmente prefiere posiciones donde tienes más opciones, por ejemplo alfiles con diagonales abiertas, etc... 
 			//!!!MuybuenaIdea xD ---> Esto se puede medir por ejemplo usando el nº de jugadas legales posibles en una posición como score para la movilidad.
-
 
 		//TODO 6. Estructura de peones: Los peones doblados pueden dar un bonus negativo, (-0.2) 
 			//o por ejemplo los peones aislados en finales, ya que como todos sabemos son más fáciles de atacar. 
 
-
 		//TODO 7. Torre en columna abierta: Esto como sabemos suele ser positivo al igual que tener una torre en séptima. 
 			//+0.2 por torre en columna abierta, +0.2 extra si está en 7a.
-
-		//TODO 8. Tener la dama centralizada a partir de la jugada 10 +0.3, antes -0.2.
 
 
 		let whiteScore = 0;
@@ -62,14 +54,9 @@ export class BoardController {
 				q: 9,
 				k: 0,
 			}[piece.type];
-
+			
 			var bonusValue = this.evaluateBonus(piece, square[i]);
-
-			//TODO Se supone que esto controlará las piezas que hay alrededor del rey para sumar algunas décimas por piezas cerca.
-			/*if(bool){
-				getNearbyPieces("e1", 1);
-				bool = false;
-			}*/
+			
 			if (piece.color === "w") {
 				whiteScore += pieceValue + bonusValue;
 			} else {
@@ -91,13 +78,21 @@ export class BoardController {
 	};	
 
 	getAbsoluteValue(type, isWhite, x ,y) {
+		var bonus=0;
 		switch (type) {
 			case 'p': return (isWhite ? constants.pawnEvalWhite[y][x] : constants.pawnEvalBlack[y][x]);
-			case 'r': return (isWhite ? constants.rookEvalWhite[y][x] : constants.rookEvalBlack[y][x]);
+			case 'r':
+				if(game.moves({square: this.getLetterByNum(y+1)+x}).length >= 10) bonus = 0.5;
+				return (isWhite ? constants.rookEvalWhite[y][x] : constants.rookEvalBlack[y][x]);
 			case 'n': return constants.knightEval[y][x];
-			case 'b': return (isWhite ? constants.bishopEvalWhite[y][x] : constants.bishopEvalBlack[y][x]);
+			case 'b':
+				if(game.moves({square: this.getLetterByNum(y+1)+x}).length >= 6) bonus = 0.5;
+				return bonus + (isWhite ? constants.bishopEvalWhite[y][x] : constants.bishopEvalBlack[y][x]);
 			case 'q': return constants.evalQueen[y][x];
-			case 'k': return (isWhite ? constants.kingEvalWhite[y][x] : constants.kingEvalBlack[y][x]);
+			case 'k': 				
+				//Controlar las piezas alrededor del rey para sumar algunas décimas por piezas cerca.
+				bonus = this.getNearbyPieces(x+1, y+1, 1);
+				return bonus + (isWhite ? constants.kingEvalWhite[y][x] : constants.kingEvalBlack[y][x]);
 			default: return 0;
 		  }
 	};
@@ -156,8 +151,9 @@ export class BoardController {
 		return copy;
 	}
 
-	getNearbyPieces(piecePosition, range) {
+	getNearbyPieces(x, y, range) {
 		// Obtener las coordenadas de la casilla en la que se encuentra la pieza que deseas examinar
+		var piecePosition = this.getLetterByNum(y)+x;
 		var coords = piecePosition;
 
 		// Crear un array para almacenar las piezas adyacentes
@@ -169,15 +165,15 @@ export class BoardController {
 		var aux1, aux2;
 		var row, col;
 
-		for (row = ((aux1 = piecePosition[1] - range) > 0 ) ? aux1 : 1; row <= (parseInt(piecePosition[1]) + range); row++) {
+		for (row = ((aux1 = x - range) > 0 ) ? aux1 : 1; row <= (x + range); row++) {
 
-			for (col = ((aux2 = this.getNumByLetter(piecePosition[0]) - range) > 0) ? aux2 : 1; col <= (this.getNumByLetter(piecePosition[0]) + range); col++) {
+			for (col = ((aux2 = y - range) > 0) ? aux2 : 1; col <= y + range; col++) {
 				coords = this.getLetterByNum(col)+row;
 				positionReaded.push(coords);
 
 				if(coords !== piecePosition){
 					if (game.get(coords)) {
-						var piece = game.get(coords);
+						var piece = game.get(coords);						
 						if (piece) {
 							nearbyPieces.push(piece);
 							positionSelected.push(coords);
@@ -186,8 +182,19 @@ export class BoardController {
 				}
 			}
 		}
-		return nearbyPieces;
+		return this.isKingSafe(nearbyPieces);
     }
+
+	isKingSafe(nearbyPieces) {
+		var cont=0, rockNear, bonus=0;
+		nearbyPieces.forEach(piece => {
+			if(piece.type === 'p') cont++;
+			if(piece.type === 'r') rockNear = true;
+		});
+		if(rockNear) bonus += 0.2;
+		if(cont === 3) bonus += 0.3;
+		return bonus; 
+	}
 
 	getNumByLetter(letter){
 		const letterMap = {
