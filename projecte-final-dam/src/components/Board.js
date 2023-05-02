@@ -1,13 +1,12 @@
 import React from 'react'
 import { useState } from "react";
-import { Chess } from "chess.js";
+import { Chess, WHITE } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { BoardController } from "../controllers/BoardController";
 
 export const Board = () => {
 	const [game, setGame] = useState(new Chess());
 	const boardController = new BoardController(game);
-	
 	var numMovements;
 
 	function onDrop(sourceSquare, targetSquare) {
@@ -43,7 +42,7 @@ export const Board = () => {
 
 	function getBestMove(fen) {
 		const game = new Chess(fen);
-		const depth = 6; //Depth from the research tree
+		const depth = 8; //Depth from the research tree
 		const alpha = -Infinity;
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";
@@ -52,7 +51,7 @@ export const Board = () => {
 		const [bestMove, _] = boardController.minimax(depth, alpha, beta, isMaximizingPlayer);
 		console.timeEnd('loop'); //Calculation of the time spent to process the movement done.
  
-		//console.log("bestMove: "+ bestMove +" - value: "+ _);
+		console.log("bestMove: "+ bestMove +" - value: "+ _);
 		return bestMove;
 	}
 

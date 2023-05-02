@@ -15,8 +15,9 @@ Se puede añadir un pequeño bonus por la pareja de alfiles (con la misma se cub
 - [X] Tablas de piezas y casillas:
 Son una manera simple de asignar valores a piezas específicas en casillas específicas. Por ejemplo durante la apertura, los peones tendrán un pequeño bonus por ocupar casillas centrales. *El rey en la fase final no entra a evaluar su posicion a partir de la tabla.*
 
-- [X] Seguridad del rey:
+- [ ] Seguridad del rey:
 Por ejemplo se puede medir calculando la cantidad de peones que rodean al rey, o si hay una torre cerca del mismo. Sumar +0.2 si 3 peones estan maximo a dos casillas de rey. +0.2 si hay una torre a 3 casillas del rey, +0.1 por otras piezas.
+***Para mejorar en eficiencia se podría solo comporbar la seguridad del rey cuando se ponga en false la opción de enrroque (.getCastlingRights(color))***
 
 - [ ] Estructura de peones:
 Los peones doblados pueden dar un bonus negativo, (-0.2) o por ejemplo los peones aislados en finales, ya que son más fáciles de atacar. 

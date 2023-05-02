@@ -1,4 +1,4 @@
-import { SQUARES } from "chess.js";
+import { BLACK, SQUARES, WHITE } from "chess.js";
 import * as constants from "../Constants.js";
 
 let game;
@@ -13,7 +13,7 @@ export class BoardController {
 		const square = SQUARES;
 		
 		for (let i = 0; i < 64; i++) {
-			const piece = game.get(square[i]);
+			const piece = game.get(square[i]);			
 
 			if (piece === null) {
 				continue;
@@ -25,7 +25,7 @@ export class BoardController {
 				b: 3,
 				r: 5,
 				q: 9,
-				k: 900,
+				k: 0,
 			}[piece.type];
 			
 			var bonusValue = this.evaluateBonus(piece, square[i]);
@@ -60,7 +60,12 @@ export class BoardController {
 				if(game.moves({square: this.getLetterByNum(y+1)+x}).length >= 6) bonus = 0.5;
 				return bonus + (isWhite ? constants.bishopEvalWhite[y][x] : constants.bishopEvalBlack[y][x]);
 			case 'q': return constants.evalQueen[y][x];
-			case 'k': 				
+			case 'k': 			
+				/*if(isWhite) {
+					game.getCastlingRights(WHITE);
+				}else{
+					game.getCastlingRights(BLACK);
+				}*/
 				bonus = this.getNearbyPieces(x+1, y+1, 2);
 				return bonus + (isWhite ? constants.kingEvalWhite[y][x] : constants.kingEvalBlack[y][x]);
 			default: return 0;
