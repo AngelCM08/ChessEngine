@@ -42,7 +42,7 @@ export const ModuleBoard = () => {
 
 	function getBestMove(fen) {
 		const game = new Chess(fen);
-		const depth = 6; // profundidad de búsqueda del árbol
+		const depth = 4; // profundidad de búsqueda del árbol
 		const alpha = -Infinity;
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";

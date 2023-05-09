@@ -22,6 +22,13 @@ export const Board = () => {
 		return true;
 	}
 
+	function makeBestMove() {
+		const bestMove = getBestMove(game.fen());
+		if (bestMove) {
+			makeAMove(bestMove);
+		}
+	}
+
 	function makeAMove(move) {
 		const gameCopy = { ...game };
 
@@ -31,13 +38,6 @@ export const Board = () => {
 		numMovements = game.history().length / 2;
 		setGame(gameCopy);
 		return result; //null if the move was illegal, the move object if the move was legal
-	}
-
-	function makeBestMove() {
-		const bestMove = getBestMove(game.fen());
-		if (bestMove) {
-			makeAMove(bestMove);
-		}
 	}
 
 	function getBestMove(fen) {
@@ -55,5 +55,5 @@ export const Board = () => {
 		return bestMove;
 	}
 
-	return <Chessboard className="tablero" position={game.fen()} onPieceDrop={onDrop} />;
+	return <Chessboard className="board" position={game.fen()} onPieceDrop={onDrop} />;
 }
