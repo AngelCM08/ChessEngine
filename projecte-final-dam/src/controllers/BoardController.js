@@ -60,12 +60,7 @@ export class BoardController {
 				if(game.moves({square: this.getLetterByNum(y+1)+x}).length >= 6) bonus = 0.5;
 				return bonus + (isWhite ? constants.bishopEvalWhite[y][x] : constants.bishopEvalBlack[y][x]);
 			case 'q': return constants.evalQueen[y][x];
-			case 'k': 			
-				/*if(isWhite) {
-					game.getCastlingRights(WHITE);
-				}else{
-					game.getCastlingRights(BLACK);
-				}*/
+			case 'k':
 				bonus = this.getNearbyPieces(x+1, y+1, 2);
 				return bonus + (isWhite ? constants.kingEvalWhite[y][x] : constants.kingEvalBlack[y][x]);
 			default: return 0;
