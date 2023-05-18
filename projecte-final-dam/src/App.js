@@ -7,13 +7,12 @@ function App() {
       <header className='App-header'>
         <h1>Chess Module</h1>
       </header>
-      <body className='App-body'>
+      <div className='App-body'>
           <Board/>
         <div className='info'>
         </div>
-      </body>
+      </div>
     </div>
   );
 }
-
 export default App;

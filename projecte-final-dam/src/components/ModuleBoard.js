@@ -1,17 +1,22 @@
 import React, {useState, useEffect} from 'react'
+import { Chess } from "chess.js";
 import { Chessboard } from "react-chessboard";
 
 export const ModuleBoard = ({position}) => {
-	const [moduleBoardPosition, setModuleBoardPosition] = useState('');
+	const [game, setGame] = useState(new Chess());
 
 	useEffect(() => { 
-		console.log(position);
-		setModuleBoardPosition(position);
+		if(position !== undefined){
+			console.log("Pos: "+position);
+			const updatedGame = new Chess();
+			updatedGame.load(position);
+			setGame(updatedGame);
+		}
 	}, [position]);
 
 	return (
-		<div>
-			<Chessboard position={moduleBoardPosition} />
-		</div>
+		<>
+			<Chessboard position={game.fen()} />
+		</>
 	);
 }

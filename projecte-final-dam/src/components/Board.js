@@ -54,9 +54,9 @@ export const Board = () => {
 		const isMaximizingPlayer = game.turn() === "w";
 
 		console.time('loop'); 
-		const [bestMove, _] = minimax(depth, alpha, beta, isMaximizingPlayer);
+		const [bestMove, _] = minimax(depth, alpha, beta, isMaximizingPlayer, "");
 		console.timeEnd('loop'); //Calculation of the time spent to process the movement done.
- 
+		
 		console.log("bestMove: "+ bestMove +" - value: "+ _);
 		return bestMove;
 	}
@@ -139,12 +139,12 @@ export const Board = () => {
 
 		for (let i = 0; i < randomMoves.length; i++) {
 			game.move(randomMoves[i]);
-			//Show by console the movements that are being calculated.
-			
+			//Show by console the movements that are being calculated.		
+				
 			updatePosition(game.fen());
 
 			//Evaluate next position
-			const [_, value, fen] = minimax(depth - 1, alpha, beta, !isMaximizingPlayer);
+			const [_, value] = minimax(depth - 1, alpha, beta, !isMaximizingPlayer);
 			game.undo();
 
 			if (isMaximizingPlayer) {
@@ -165,7 +165,7 @@ export const Board = () => {
 				break;
 			}
 		}		
-		return [bestMove, bestMoveValue, game.fen()];
+		return [bestMove, bestMoveValue];
 	}
 
 	function shuffle(array) {
