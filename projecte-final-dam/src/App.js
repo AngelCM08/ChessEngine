@@ -1,6 +1,5 @@
 import './App.css';
 import { Board } from './components/Board';
-import { ModuleBoard } from './components/ModuleBoard';
 
 function App() {
   return (
@@ -8,13 +7,8 @@ function App() {
       <header className='App-header'>
         <h1>Chess Module</h1>
       </header>
-      <body className='App-body'>        
-        <div className='board'>
+      <body className='App-body'>
           <Board/>
-        </div>
-        <div className='moduleBoard'>
-          <ModuleBoard/>
-        </div>
         <div className='info'>
         </div>
       </body>

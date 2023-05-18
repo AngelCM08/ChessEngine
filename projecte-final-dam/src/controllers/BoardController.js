@@ -1,4 +1,4 @@
-import { BLACK, SQUARES, WHITE } from "chess.js";
+import { SQUARES } from "chess.js";
 import * as constants from "../Constants.js";
 
 let game;
