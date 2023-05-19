@@ -7,8 +7,9 @@ import * as constants from "../Constants.js";
 
 export const Board = () => {
 	const [game, setGame] = useState(new Chess());
-	const [position, setPosition] = useState('');
+	const [position, setPosition] = useState([]);
 	var numMovements;
+	var positionsSearched = [];
 
 	const updatePosition = (newPosition) => {
 		setPosition(newPosition);
@@ -48,15 +49,19 @@ export const Board = () => {
 
 	function getBestMove(fen) {
 		const game = new Chess(fen);
-		const depth = 5; //Depth from the research tree
+		const depth = 3; //Depth from the research tree
 		const alpha = -Infinity;
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";
 
 		console.time('loop'); 
-		const [bestMove, _] = minimax(depth, alpha, beta, isMaximizingPlayer, "");
+		const [bestMove, _] = minimax(depth, alpha, beta, isMaximizingPlayer);
 		console.timeEnd('loop'); //Calculation of the time spent to process the movement done.
 		
+		console.log(positionsSearched);
+		updatePosition(positionsSearched);
+		console.log(position);
+
 		console.log("bestMove: "+ bestMove +" - value: "+ _);
 		return bestMove;
 	}
@@ -124,6 +129,8 @@ export const Board = () => {
 
 	function minimax(depth, alpha, beta, isMaximizingPlayer) {
 		if (depth === 0 || game.game_over()) {
+			positionsSearched.push(game.fen());
+			//console.log(positionsSearched);
 			return [null, evaluateBoard(game.board())];
 		}
 
@@ -140,8 +147,8 @@ export const Board = () => {
 		for (let i = 0; i < randomMoves.length; i++) {
 			game.move(randomMoves[i]);
 			//Show by console the movements that are being calculated.		
-				
-			updatePosition(game.fen());
+			
+			//console.log(game.ascii());
 
 			//Evaluate next position
 			const [_, value] = minimax(depth - 1, alpha, beta, !isMaximizingPlayer);
