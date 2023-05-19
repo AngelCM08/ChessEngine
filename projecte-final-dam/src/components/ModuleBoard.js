@@ -6,15 +6,12 @@ export const ModuleBoard = ({position}) => {
 	const [game, setGame] = useState(new Chess());
 
 	useEffect(() => { 
-		console.log(position);
-		if(!(position === undefined)){
+		if(position !== undefined && position.length > 0){
 			//console.log("Pos: "+position);
 			const updatedGame = new Chess();
-			updatedGame.move(position[0]);
-			console.log(position[0]);
+			updatedGame.load(position[0]);
 			setGame(updatedGame);
 		}
-		console.log(game.ascii());
 	}, [position]);
 
 	return (
