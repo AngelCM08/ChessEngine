@@ -55,14 +55,12 @@ export const Board = () => {
 		const isMaximizingPlayer = game.turn() === "w";
 
 		console.time('loop');
-		const [bestMove, _] = minimax(depth, alpha, beta, isMaximizingPlayer);
+		const [bestMove, bestMoveValue] = minimax(depth, alpha, beta, isMaximizingPlayer);
 		console.timeEnd('loop'); //Calculation of the time spent to process the movement done.
 
-		console.log(positionsSearched);
 		updatePosition(positionsSearched);
-		console.log(position);
 
-		console.log("bestMove: " + bestMove + " - value: " + _);
+		console.log("bestMove: " + bestMove + " - value: " + bestMoveValue);
 		return bestMove;
 	}
 
@@ -251,13 +249,6 @@ export const Board = () => {
 		};
 		return numMap[num];
 	}
-
-	function consultPhase() {
-		/*if(numMovements < gamePhase.Initial){
-			return 0; //Initial
-		}else if()*/
-	}
-
 
 	// Board decoration elements
 

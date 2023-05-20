@@ -3,23 +3,33 @@ import { Chess } from 'chess.js';
 import { Chessboard } from 'react-chessboard';
 
 export const ModuleBoard = ({ position }) => {
-  const [game, setGame] = useState(new Chess());
-  const [currentIndex, setCurrentIndex] = useState(0);
+	const [game, setGame] = useState(new Chess());
+	const [currentIndex, setCurrentIndex] = useState(0);
 
-  useEffect(() => {
-    const updatePosition = () => {
-      const updatedGame = new Chess();
-      updatedGame.load(position[currentIndex]);
-      setGame(updatedGame);
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % position.length);
-    };
+	useEffect(() => {
+		setCurrentIndex(0); // Reinicia currentIndex a 0 cuando se recibe una nueva posición
+	}, [position]);
 
-    if (position !== undefined && position.length > 0) {
-      const interval = setInterval(updatePosition, 1000); // Actualiza cada 1 segundo (1000 ms)
+	useEffect(() => {
+		const updatePosition = () => {
+			if(currentIndex < position.length){				
+				const updatedGame = new Chess(position[currentIndex]);
+				setGame(updatedGame);
+				setCurrentIndex((prevIndex) => (prevIndex + 1) % position.length);
+			}else setCurrentIndex(0);
+		};
 
-      return () => clearInterval(interval); // Limpia el intervalo al desmontar el componente
-    }
-  }, [position, game]);
+		if (position !== undefined && position.length > 0) {
+			const interval = setInterval(updatePosition, 100); // Actualiza cada 1 segundo (1000 ms)
 
-  return <Chessboard position={game.fen()} arePiecesDraggable={false} customBoardStyle={{border: '2px solid black'}} />;
+			return () => clearInterval(interval); // Limpia el intervalo al desmontar el componente
+		}
+	}, [position, game]);
+
+	return <Chessboard 
+				position={game.fen()} 
+				animationDuration={0}
+				arePiecesDraggable={false}
+				customBoardStyle={{ border: '2px solid black' }} 
+			/>;
 };

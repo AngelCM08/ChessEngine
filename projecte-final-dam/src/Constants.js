@@ -78,16 +78,6 @@ export const kingEvalWhite =
 
 export const kingEvalBlack = kingEvalWhite.reverse();
 
-export const gamePhase = 
-{
-    //Consideramos fase inicial hasta el movimiento 12 incluído.
-    First: 13,
-    //Consideramos fase medio juego a partir del movimiento 13 y durará hasta que queden <17 piezas.
-    Middle: 17,
-    //Consideramos fase final <17 piezas.
-    Final: 16
-};
-
 export const whiteSquare = '#f0d9b5';
 export const blackSquare = '#b58863';
 export const whiteSquareGrey = '#a9a9a9'
