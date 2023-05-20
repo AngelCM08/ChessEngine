@@ -87,3 +87,8 @@ export const gamePhase =
     //Consideramos fase final <17 piezas.
     Final: 16
 };
+
+export const whiteSquare = '#f0d9b5';
+export const blackSquare = '#b58863';
+export const whiteSquareGrey = '#a9a9a9'
+export const blackSquareGrey = '#696969'

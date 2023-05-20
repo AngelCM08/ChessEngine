@@ -24,7 +24,7 @@ export const Board = () => {
 		});
 
 		// illegal move
-		if (move === null) return false;		
+		if (move === null) return false;
 		setTimeout(makeBestMove, 200); //Needed timeout to charge correctly the movement of the piece.
 		return true;
 	}
@@ -54,15 +54,15 @@ export const Board = () => {
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";
 
-		console.time('loop'); 
+		console.time('loop');
 		const [bestMove, _] = minimax(depth, alpha, beta, isMaximizingPlayer);
 		console.timeEnd('loop'); //Calculation of the time spent to process the movement done.
-		
+
 		console.log(positionsSearched);
 		updatePosition(positionsSearched);
 		console.log(position);
 
-		console.log("bestMove: "+ bestMove +" - value: "+ _);
+		console.log("bestMove: " + bestMove + " - value: " + _);
 		return bestMove;
 	}
 
@@ -71,9 +71,9 @@ export const Board = () => {
 		let whiteScore = 0;
 		let blackScore = 0;
 		const square = SQUARES;
-		
+
 		for (let i = 0; i < 64; i++) {
-			const piece = game.get(square[i]);			
+			const piece = game.get(square[i]);
 
 			if (piece === null) {
 				continue;
@@ -87,9 +87,9 @@ export const Board = () => {
 				q: 9,
 				k: 0,
 			}[piece.type];
-			
+
 			var bonusValue = evaluateBonus(piece, square[i]);
-			
+
 			if (piece.color === "w") {
 				whiteScore += pieceValue + bonusValue;
 			} else {
@@ -104,27 +104,27 @@ export const Board = () => {
 			return 0;
 		}
 
-		var absoluteValue = getAbsoluteValue(piece.type, piece.color === 'w', (getNumByLetter(square[0])-1), square[1]-1);
+		var absoluteValue = getAbsoluteValue(piece.type, piece.color === 'w', (getNumByLetter(square[0]) - 1), square[1] - 1);
 		return piece.color === 'w' ? absoluteValue : -absoluteValue;
-	};	
+	};
 
-	function getAbsoluteValue(type, isWhite, x ,y) {
-		var bonus=0;
+	function getAbsoluteValue(type, isWhite, x, y) {
+		var bonus = 0;
 		switch (type) {
 			case 'p': return (isWhite ? constants.pawnEvalWhite[y][x] : constants.pawnEvalBlack[y][x]);
 			case 'r':
-				if(game.moves({square: getLetterByNum(y+1)+x}).length >= 10) bonus = 0.5;
+				if (game.moves({ square: getLetterByNum(y + 1) + x }).length >= 10) bonus = 0.5;
 				return (isWhite ? constants.rookEvalWhite[y][x] : constants.rookEvalBlack[y][x]);
 			case 'n': return constants.knightEval[y][x];
 			case 'b':
-				if(game.moves({square: getLetterByNum(y+1)+x}).length >= 6) bonus = 0.5;
+				if (game.moves({ square: getLetterByNum(y + 1) + x }).length >= 6) bonus = 0.5;
 				return bonus + (isWhite ? constants.bishopEvalWhite[y][x] : constants.bishopEvalBlack[y][x]);
 			case 'q': return constants.evalQueen[y][x];
 			case 'k':
-				bonus = getNearbyPieces(x+1, y+1, 2);
+				bonus = getNearbyPieces(x + 1, y + 1, 2);
 				return bonus + (isWhite ? constants.kingEvalWhite[y][x] : constants.kingEvalBlack[y][x]);
 			default: return 0;
-		  }
+		}
 	};
 
 	function minimax(depth, alpha, beta, isMaximizingPlayer) {
@@ -137,17 +137,17 @@ export const Board = () => {
 		let bestMove = null;
 		let bestMoveValue = isMaximizingPlayer ? -Infinity : Infinity;
 		const possibleMoves = game.moves();
-		
+
 		/*If the quantity of legal movements is above 27 they are divided by 3, if it is between 16(not included) and 27(included) they are divided by 2 and if it is under 16(included) they are not divided.
 		This is done to simplify calculation for the best move because the quantity of movements is enormous and is so difficult to optimize the application.
 		It is not possible to always get the best move, but it has a not that bad move in a faster time. */
-		var iterations = (possibleMoves.length > 16) ? ((possibleMoves.length > 27) ? possibleMoves.length/3 : possibleMoves.length/2) : possibleMoves.length;
+		var iterations = (possibleMoves.length > 16) ? ((possibleMoves.length > 27) ? possibleMoves.length / 3 : possibleMoves.length / 2) : possibleMoves.length;
 		const randomMoves = shuffle(possibleMoves).slice(0, iterations);
 
 		for (let i = 0; i < randomMoves.length; i++) {
 			game.move(randomMoves[i]);
 			//Show by console the movements that are being calculated.		
-			
+
 			//console.log(game.ascii());
 
 			//Evaluate next position
@@ -171,7 +171,7 @@ export const Board = () => {
 			if (alpha >= beta) {
 				break;
 			}
-		}		
+		}
 		return [bestMove, bestMoveValue];
 	}
 
@@ -186,22 +186,22 @@ export const Board = () => {
 
 	function getNearbyPieces(x, y, range) {
 		// Get coords of the piece that it wants to examine.
-		var piecePosition = getLetterByNum(y)+x;
+		var piecePosition = getLetterByNum(y) + x;
 		var coords = piecePosition;
 		var nearbyPieces = [];
 		var positionReaded = [];
 		var positionSelected = [];
 		var aux1, aux2, row, col;
 
-		for (row = ((aux1 = x - range) > 0 ) ? aux1 : 1; row <= (x + range); row++) {
+		for (row = ((aux1 = x - range) > 0) ? aux1 : 1; row <= (x + range); row++) {
 			for (col = ((aux2 = y - range) > 0) ? aux2 : 1; col <= y + range; col++) {
-				coords = getLetterByNum(col)+row;
+				coords = getLetterByNum(col) + row;
 				positionReaded.push(coords);
 
-				if(coords !== piecePosition){
+				if (coords !== piecePosition) {
 					if (game.get(coords)) {
-						var piece = game.get(coords);	
-											
+						var piece = game.get(coords);
+
 						if (piece) {
 							nearbyPieces.push(piece);
 							positionSelected.push(coords);
@@ -211,20 +211,20 @@ export const Board = () => {
 			}
 		}
 		return isKingSafe(nearbyPieces);
-    }
-
-	function isKingSafe(nearbyPieces) {
-		var counter=0, rockNear, bonus=0;
-		nearbyPieces.forEach(piece => {
-			if(piece.type === 'p') counter++;
-			if(piece.type === 'r') rockNear = true;
-		});
-		if(rockNear) bonus += 0.2;
-		if(counter === 3) bonus += 0.3;
-		return bonus; 
 	}
 
-	function getNumByLetter(letter){
+	function isKingSafe(nearbyPieces) {
+		var counter = 0, rockNear, bonus = 0;
+		nearbyPieces.forEach(piece => {
+			if (piece.type === 'p') counter++;
+			if (piece.type === 'r') rockNear = true;
+		});
+		if (rockNear) bonus += 0.2;
+		if (counter === 3) bonus += 0.3;
+		return bonus;
+	}
+
+	function getNumByLetter(letter) {
 		const letterMap = {
 			'a': 1,
 			'b': 2,
@@ -234,34 +234,85 @@ export const Board = () => {
 			'f': 6,
 			'g': 7,
 			'h': 8
-		};		  
+		};
 		return letterMap[letter];
 	}
-	
+
 	function getLetterByNum(num) {
 		const numMap = {
-		  1: 'a',
-		  2: 'b',
-		  3: 'c',
-		  4: 'd',
-		  5: 'e',
-		  6: 'f',
-		  7: 'g',
-		  8: 'h'
-		};		
+			1: 'a',
+			2: 'b',
+			3: 'c',
+			4: 'd',
+			5: 'e',
+			6: 'f',
+			7: 'g',
+			8: 'h'
+		};
 		return numMap[num];
 	}
-    
+
 	function consultPhase() {
 		/*if(numMovements < gamePhase.Initial){
 			return 0; //Initial
 		}else if()*/
 	}
 
+
+	// Board decoration elements
+
+	const onMouseOverSquare = (square) => {
+		// get list of possible moves for this square
+		var moves = game.moves({
+			square: square,
+			verbose: true
+		})
+
+		// exit if there are no moves available for this square
+		if (moves.length === 0) return
+
+		// highlight the square they moused over
+		addSquareHighlight(document.querySelector('[data-square="' + square + '"]'));
+
+		// highlight the possible squares for this piece
+		for (var i = 0; i < moves.length; i++) {
+			addSquareHighlight(document.querySelector('[data-square="' + moves[i].to + '"]'));
+		}
+	};	
+
+	const onMouseOutSquare = () => {
+		deleteAllSquareHighlight();
+	};
+
+	function addSquareHighlight(square) {
+		if(square.getAttribute('data-square-color') === 'black') square.style.backgroundColor = constants.blackSquareGrey;
+		else square.style.backgroundColor = constants.whiteSquareGrey;
+	}
+
+	function deleteAllSquareHighlight() {
+		const blackSquares = document.querySelectorAll('[data-square-color="black"]');
+		const whiteSquares = document.querySelectorAll('[data-square-color="white"]');
+
+		blackSquares.forEach(square => {
+			square.style.backgroundColor = constants.blackSquare;
+		});
+
+		whiteSquares.forEach(square => {
+			square.style.backgroundColor = constants.whiteSquare;
+		});	
+	}
+
 	return (
 		<>
 			<div className='board'>
-				<Chessboard className="board" position={game.fen()} onPieceDrop={onDrop} />
+				<Chessboard className="board"
+					position={game.fen()}
+					onPieceDrop={onDrop}
+					onMouseOverSquare={onMouseOverSquare}
+					onMouseOutSquare={onMouseOutSquare}
+					areArrowsAllowed={true}
+					customBoardStyle={{ border: '4px solid black' }}
+				/>
 			</div>
 			<div className='moduleBoard'>
 				<ModuleBoard position={position} />
