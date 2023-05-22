@@ -1,19 +1,27 @@
 import React from 'react'
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Chess, SQUARES } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { ModuleBoard } from './ModuleBoard';
+import config from '../config';
+import { Info } from './Info';
 import * as constants from "../Constants.js";
 
 export const Board = () => {
 	const [game, setGame] = useState(new Chess());
 	const [position, setPosition] = useState([]);
+	const [gameOver, setGameOver] = useState(false);
+	const [configState, setConfigState] = useState(config);
 	var numMovements;
 	var positionsSearched = [];
 
 	const updatePosition = (newPosition) => {
 		setPosition(newPosition);
 	};
+
+	useEffect(() => {
+		if (config.boardOrientation === 'black') getBestMove(game.fen());
+	}, [config.boardOrientation]);
 
 	//Board Interface
 	function onDrop(sourceSquare, targetSquare) {
@@ -26,6 +34,9 @@ export const Board = () => {
 		// illegal move
 		if (move === null) return false;
 		setTimeout(makeBestMove, 200); //Needed timeout to charge correctly the movement of the piece.
+
+		// 
+		if (gameOver) return false;
 		return true;
 	}
 
@@ -38,12 +49,15 @@ export const Board = () => {
 
 	function makeAMove(move) {
 		const gameCopy = { ...game };
-
 		/********Por aquí debería haber una función que ponga colorines a los movimientos.*********/
 
 		const result = gameCopy.move(move);
 		numMovements = game.history().length / 2;
 		setGame(gameCopy);
+
+		// Detect if game is over
+		if (gameCopy.game_over()) setGameOver(true);
+
 		return result; //null if the move was illegal, the move object if the move was legal
 	}
 
@@ -73,9 +87,7 @@ export const Board = () => {
 		for (let i = 0; i < 64; i++) {
 			const piece = game.get(square[i]);
 
-			if (piece === null) {
-				continue;
-			}
+			if (piece === null) continue;
 
 			const pieceValue = {
 				p: 1,
@@ -88,19 +100,14 @@ export const Board = () => {
 
 			var bonusValue = evaluateBonus(piece, square[i]);
 
-			if (piece.color === "w") {
-				whiteScore += pieceValue + bonusValue;
-			} else {
-				blackScore += pieceValue + bonusValue;
-			}
+			if (piece.color === "w") whiteScore += pieceValue + bonusValue;
+			else blackScore += pieceValue + bonusValue;
 		}
 		return whiteScore - blackScore;
 	}
 
 	function evaluateBonus(piece, square) {
-		if (piece === null) {
-			return 0;
-		}
+		if (piece === null) return 0;
 
 		var absoluteValue = getAbsoluteValue(piece.type, piece.color === 'w', (getNumByLetter(square[0]) - 1), square[1] - 1);
 		return piece.color === 'w' ? absoluteValue : -absoluteValue;
@@ -134,18 +141,18 @@ export const Board = () => {
 
 		let bestMove = null;
 		let bestMoveValue = isMaximizingPlayer ? -Infinity : Infinity;
-		const possibleMoves = game.moves();
+		//const possibleMoves = game.moves();
+		const randomMoves = game.moves();
 
 		/*If the quantity of legal movements is above 27 they are divided by 3, if it is between 16(not included) and 27(included) they are divided by 2 and if it is under 16(included) they are not divided.
 		This is done to simplify calculation for the best move because the quantity of movements is enormous and is so difficult to optimize the application.
 		It is not possible to always get the best move, but it has a not that bad move in a faster time. */
-		var iterations = (possibleMoves.length > 16) ? ((possibleMoves.length > 27) ? possibleMoves.length / 3 : possibleMoves.length / 2) : possibleMoves.length;
-		const randomMoves = shuffle(possibleMoves).slice(0, iterations);
+		/*var iterations = (possibleMoves.length > 16) ? ((possibleMoves.length > 27) ? possibleMoves.length / 3 : possibleMoves.length / 2) : possibleMoves.length;
+		const randomMoves = shuffle(possibleMoves).slice(0, iterations);*/
 
 		for (let i = 0; i < randomMoves.length; i++) {
 			game.move(randomMoves[i]);
-			//Show by console the movements that are being calculated.		
-
+			//Show by console the movements that are being calculated.
 			//console.log(game.ascii());
 
 			//Evaluate next position
@@ -166,9 +173,7 @@ export const Board = () => {
 				beta = Math.min(beta, value);
 			}
 
-			if (alpha >= beta) {
-				break;
-			}
+			if (alpha >= beta) break;
 		}
 		return [bestMove, bestMoveValue];
 	}
@@ -251,7 +256,6 @@ export const Board = () => {
 	}
 
 	// Board decoration elements
-
 	const onMouseOverSquare = (square) => {
 		// get list of possible moves for this square
 		var moves = game.moves({
@@ -269,14 +273,14 @@ export const Board = () => {
 		for (var i = 0; i < moves.length; i++) {
 			addSquareHighlight(document.querySelector('[data-square="' + moves[i].to + '"]'));
 		}
-	};	
+	};
 
 	const onMouseOutSquare = () => {
 		deleteAllSquareHighlight();
 	};
 
 	function addSquareHighlight(square) {
-		if(square.getAttribute('data-square-color') === 'black') square.style.backgroundColor = constants.blackSquareGrey;
+		if (square.getAttribute('data-square-color') === 'black') square.style.backgroundColor = constants.blackSquareGrey;
 		else square.style.backgroundColor = constants.whiteSquareGrey;
 	}
 
@@ -290,13 +294,38 @@ export const Board = () => {
 
 		whiteSquares.forEach(square => {
 			square.style.backgroundColor = constants.whiteSquare;
-		});	
+		});
 	}
+
+
+	// Info & Configuration
+
+	const onSelectTab = (selectedOption) => {
+		console.log('Opción seleccionada:', selectedOption);
+	};
+
+	const onChangeBoardOrientation = (selectedOption) => {
+		setConfigState((prevConfig) => ({
+			...prevConfig,
+			boardOrientation: selectedOption.target.value,
+		}));
+	};
+
+	const onChangeUpdateFreq = (selectedOption) => {
+		console.log(selectedOption.target.value);
+		setConfigState((prevConfig) => ({
+			...prevConfig,
+			updateFreq: selectedOption.target.value,
+		}));
+		console.log(configState);
+	};
+
 
 	return (
 		<>
 			<div className='board'>
 				<Chessboard className="board"
+					boardOrientation={configState.boardOrientation}
 					position={game.fen()}
 					onPieceDrop={onDrop}
 					onMouseOverSquare={onMouseOverSquare}
@@ -306,7 +335,10 @@ export const Board = () => {
 				/>
 			</div>
 			<div className='moduleBoard'>
-				<ModuleBoard position={position} />
+				<ModuleBoard position={position} configState={configState} />
+			</div>
+			<div className='info'>
+				<Info configState={configState} onSelectTab={onSelectTab} onChangeBoardOrientation={onChangeBoardOrientation} onChangeUpdateFreq={onChangeUpdateFreq} />
 			</div>
 		</>
 	);

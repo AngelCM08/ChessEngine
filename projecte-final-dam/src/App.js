@@ -9,8 +9,6 @@ function App() {
       </header>
       <div className='App-body'>
           <Board/>
-        <div className='info'>
-        </div>
       </div>
     </div>
   );
