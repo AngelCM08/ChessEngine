@@ -1,5 +1,5 @@
 import React from 'react'
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Chess, SQUARES } from "chess.js";
 import { Chessboard } from "react-chessboard";
 import { ModuleBoard } from './ModuleBoard';
@@ -19,9 +19,9 @@ export const Board = () => {
 		setPosition(newPosition);
 	};
 
-	useEffect(() => {
+	/*useEffect(() => {
 		if (config.boardOrientation === 'black') getBestMove(game.fen());
-	}, [config.boardOrientation]);
+	}, [config.boardOrientation]);*/
 
 	//Board Interface
 	function onDrop(sourceSquare, targetSquare) {
@@ -63,7 +63,7 @@ export const Board = () => {
 
 	function getBestMove(fen) {
 		const game = new Chess(fen);
-		const depth = 3; //Depth from the research tree
+		const depth = configState.depth; //Depth from the research tree
 		const alpha = -Infinity;
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";
@@ -141,19 +141,24 @@ export const Board = () => {
 
 		let bestMove = null;
 		let bestMoveValue = isMaximizingPlayer ? -Infinity : Infinity;
-		//const possibleMoves = game.moves();
-		const randomMoves = game.moves();
+		let randomMoves = null;
 
 		/*If the quantity of legal movements is above 27 they are divided by 3, if it is between 16(not included) and 27(included) they are divided by 2 and if it is under 16(included) they are not divided.
 		This is done to simplify calculation for the best move because the quantity of movements is enormous and is so difficult to optimize the application.
 		It is not possible to always get the best move, but it has a not that bad move in a faster time. */
-		/*var iterations = (possibleMoves.length > 16) ? ((possibleMoves.length > 27) ? possibleMoves.length / 3 : possibleMoves.length / 2) : possibleMoves.length;
-		const randomMoves = shuffle(possibleMoves).slice(0, iterations);*/
+		if(configState.reduceIterations){
+			const possibleMoves = game.moves();
+			var iterations = (possibleMoves.length > 16) ? ((possibleMoves.length > 27) ? possibleMoves.length / 3 : possibleMoves.length / 2) : possibleMoves.length;
+			randomMoves = shuffle(possibleMoves).slice(0, iterations);
+		}else{
+			randomMoves = game.moves();
+		}
 
 		for (let i = 0; i < randomMoves.length; i++) {
 			game.move(randomMoves[i]);
 			//Show by console the movements that are being calculated.
-			//console.log(game.ascii());
+
+			if(configState.showAscii) console.log(game.ascii());
 
 			//Evaluate next position
 			const [_, value] = minimax(depth - 1, alpha, beta, !isMaximizingPlayer);
@@ -300,9 +305,7 @@ export const Board = () => {
 
 	// Info & Configuration
 
-	const onSelectTab = (selectedOption) => {
-		console.log('Opción seleccionada:', selectedOption);
-	};
+	const onSelectTab = () => {};
 
 	const onChangeBoardOrientation = (selectedOption) => {
 		setConfigState((prevConfig) => ({
@@ -312,14 +315,18 @@ export const Board = () => {
 	};
 
 	const onChangeUpdateFreq = (selectedOption) => {
-		console.log(selectedOption.target.value);
 		setConfigState((prevConfig) => ({
 			...prevConfig,
 			updateFreq: selectedOption.target.value,
 		}));
-		console.log(configState);
 	};
 
+	const onChangeDepth = (selectedOption) => {
+		setConfigState((prevConfig) => ({
+			...prevConfig,
+			depth: selectedOption.target.value,
+		}));
+	};
 
 	return (
 		<>
@@ -335,10 +342,19 @@ export const Board = () => {
 				/>
 			</div>
 			<div className='moduleBoard'>
-				<ModuleBoard position={position} configState={configState} />
+				<ModuleBoard 
+					position={position} 
+					configState={configState} 
+				/>
 			</div>
 			<div className='info'>
-				<Info configState={configState} onSelectTab={onSelectTab} onChangeBoardOrientation={onChangeBoardOrientation} onChangeUpdateFreq={onChangeUpdateFreq} />
+				<Info 
+					configState={configState} 
+					onSelectTab={onSelectTab} 
+					onChangeBoardOrientation={onChangeBoardOrientation} 
+					onChangeUpdateFreq={onChangeUpdateFreq} 
+					onChangeDepth={onChangeDepth}
+				/>
 			</div>
 		</>
 	);
