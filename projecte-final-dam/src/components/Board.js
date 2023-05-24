@@ -12,16 +12,12 @@ export const Board = () => {
 	const [position, setPosition] = useState([]);
 	const [gameOver, setGameOver] = useState(false);
 	const [configState, setConfigState] = useState(config);
-	var numMovements;
+	const [movementsState, setMovementsState] = useState(0);
 	var positionsSearched = [];
 
 	const updatePosition = (newPosition) => {
 		setPosition(newPosition);
 	};
-
-	/*useEffect(() => {
-		if (config.boardOrientation === 'black') getBestMove(game.fen());
-	}, [config.boardOrientation]);*/
 
 	//Board Interface
 	function onDrop(sourceSquare, targetSquare) {
@@ -49,10 +45,8 @@ export const Board = () => {
 
 	function makeAMove(move) {
 		const gameCopy = { ...game };
-		/********Por aquí debería haber una función que ponga colorines a los movimientos.*********/
-
 		const result = gameCopy.move(move);
-		numMovements = game.history().length / 2;
+		setMovementsState(Math.round(game.history().length / 2));
 		setGame(gameCopy);
 
 		// Detect if game is over
@@ -67,14 +61,20 @@ export const Board = () => {
 		const alpha = -Infinity;
 		const beta = Infinity;
 		const isMaximizingPlayer = game.turn() === "w";
+		var bestMove, bestMoveValue;
 
-		console.time('loop');
-		const [bestMove, bestMoveValue] = minimax(depth, alpha, beta, isMaximizingPlayer);
-		console.timeEnd('loop'); //Calculation of the time spent to process the movement done.
+		if(configState.debugMode){
+			console.time('Time to Move');
+			[bestMove, bestMoveValue] = minimax(depth, alpha, beta, isMaximizingPlayer);
+			console.timeEnd('Time to Move'); //Calculation of the time spent to process the movement done.
+			console.log('Num of positions searched: '+positionsSearched.length);
+		}else{
+			[bestMove, bestMoveValue] = minimax(depth, alpha, beta, isMaximizingPlayer);
+		}
 
 		updatePosition(positionsSearched);
 
-		console.log("bestMove: " + bestMove + " - value: " + bestMoveValue);
+		if(configState.debugMode) console.log("Best Move: " + bestMove + "\nPosition Value: " + bestMoveValue + "\nMovement: " + movementsState);
 		return bestMove;
 	}
 
@@ -135,7 +135,6 @@ export const Board = () => {
 	function minimax(depth, alpha, beta, isMaximizingPlayer) {
 		if (depth === 0 || game.game_over()) {
 			positionsSearched.push(game.fen());
-			//console.log(positionsSearched);
 			return [null, evaluateBoard(game.board())];
 		}
 
@@ -328,6 +327,30 @@ export const Board = () => {
 		}));
 	};
 
+	const onChangeReduceIterations = (selectedOption) => {
+		var booleanValue = selectedOption.target.value === 'true';
+		setConfigState((prevConfig) => ({
+			...prevConfig,
+			reduceIterations: booleanValue,
+		}));
+	};
+
+	const onChangeShowAscii = (selectedOption) => {
+		var booleanValue = selectedOption.target.value === 'true';
+		setConfigState((prevConfig) => ({
+			...prevConfig,
+			showAscii: booleanValue,
+		}));
+	};
+
+	const onChangeDebugMode = (selectedOption) => {
+		var booleanValue = selectedOption.target.value === 'true';
+		setConfigState((prevConfig) => ({
+			...prevConfig,
+			debugMode: booleanValue,
+		}));
+	};
+
 	return (
 		<>
 			<div className='board'>
@@ -349,11 +372,16 @@ export const Board = () => {
 			</div>
 			<div className='info'>
 				<Info 
+					history={game.history({verbose:true})}
+					numMovements={movementsState}
 					configState={configState} 
 					onSelectTab={onSelectTab} 
 					onChangeBoardOrientation={onChangeBoardOrientation} 
 					onChangeUpdateFreq={onChangeUpdateFreq} 
 					onChangeDepth={onChangeDepth}
+					onChangeReduceIterations={onChangeReduceIterations}
+					onChangeShowAscii={onChangeShowAscii}
+					onChangeDebugMode={onChangeDebugMode}
 				/>
 			</div>
 		</>

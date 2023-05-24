@@ -1,10 +1,11 @@
 const config = {
+    boardOrientation: 'white',
     updateFreq: 250,
     depth: 5,
-    boardOrientation: 'white',
 
     reduceIterations: true,
     showAscii: false,
+    debugMode: false,
 };
 
 export default config;
