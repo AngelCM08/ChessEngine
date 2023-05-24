@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState } from 'react';
 import Modal from './Modal';
 
-export const Info = ({ history, numMovements, onSelectTab, onChangeBoardOrientation, onChangeUpdateFreq, configState, onChangeDepth, onChangeReduceIterations, onChangeShowAscii, onChangeDebugMode }) => {
-    const [selectedOption, setSelectedOption] = useState('tab1');
+export const Info = ({ history, numMovements, onClickResetMatch, onSelectTab, onChangeBoardOrientation, onChangeUpdateFreq, configState, onChangeDepth, onChangeReduceIterations, onChangeShowAscii, onChangeDebugMode }) => {
+    const [selectedOption, setSelectedOption] = useState('tab3');
     const sans = history.map(move => move.san);
     const joinedHistory = sans.join(', ');
 
@@ -42,6 +42,11 @@ export const Info = ({ history, numMovements, onSelectTab, onChangeBoardOrientat
         setSelectedOption(selectedOption);
     };
 
+    //Reset button
+    const handleResetMatch = () => {
+        onClickResetMatch();
+    };
+
     //Configuration selections
     const handleBoardOrientation = (selectedOption) => {
         onChangeBoardOrientation(selectedOption);
@@ -69,18 +74,28 @@ export const Info = ({ history, numMovements, onSelectTab, onChangeBoardOrientat
     return (
         <div className="container">
             <div className="lbl-menu">
+                <label className={selectedOption === 'tab3' ? 'active' : ''} htmlFor="radio3">Match History</label>
                 <label className={selectedOption === 'tab1' ? 'active' : ''} htmlFor="radio1">Configuration</label>
                 <label className={selectedOption === 'tab2' ? 'active' : ''} htmlFor="radio2">Advanced Configuration</label>
-                <label className={selectedOption === 'tab3' ? 'active' : ''} htmlFor="radio3">Match History</label>
-                <label className={selectedOption === 'tab4' ? 'active' : ''} htmlFor="radio4">XXXXXX</label>
             </div>
 
             <div className="content">
                 <input
                     type="radio"
                     name="radio"
-                    id="radio1"
+                    id="radio3"
                     defaultChecked
+                    onChange={() => handleSelection('tab3')}
+                />
+                <div className="tab3">
+                    <span><button className='resetMatch' onClick={handleResetMatch}>Reset Match</button></span>
+                    <h3>Movement nº{numMovements}</h3>
+                    <p>{joinedHistory}</p>
+                </div>
+                <input
+                    type="radio"
+                    name="radio"
+                    id="radio1"
                     onChange={() => handleSelection('tab1')}
                 />
                 <div className="tab1">
@@ -175,28 +190,6 @@ export const Info = ({ history, numMovements, onSelectTab, onChangeBoardOrientat
                             </tr>
                         </tbody>
                     </table>
-                </div>
-
-                <input
-                    type="radio"
-                    name="radio"
-                    id="radio3"
-                    onChange={() => handleSelection('tab3')}
-                />
-                <div className="tab3">
-                    <h3>{numMovements}</h3>
-                    <p>{joinedHistory}</p>
-                </div>
-
-                <input
-                    type="radio"
-                    name="radio"
-                    id="radio4"
-                    onChange={() => handleSelection('tab4')}
-                />
-                <div className="tab4">
-                    <h2>Work in progress...</h2>
-                    <p></p>
                 </div>
             </div>
 

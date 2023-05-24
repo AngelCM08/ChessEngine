@@ -154,6 +154,13 @@
 	font-weight: bold;
 	background-color: #957356;
 }
+.resetMatch {
+	background-color: #b58863;
+	color: #282c34;
+	border: 2px solid #282c34;
+	border-radius: 5px;
+}
+
 
 /* SELECTS */
 .select label {

@@ -13,6 +13,7 @@ export const Board = () => {
 	const [gameOver, setGameOver] = useState(false);
 	const [configState, setConfigState] = useState(config);
 	const [movementsState, setMovementsState] = useState(0);
+	const startPositionFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 	var positionsSearched = [];
 
 	const updatePosition = (newPosition) => {
@@ -301,9 +302,13 @@ export const Board = () => {
 		});
 	}
 
+	const onClickResetMatch = () => {
+		const startGame = new Chess(startPositionFen);
+		startGame.load(startPositionFen);
+		setGame(startGame);
+	};
 
 	// Info & Configuration
-
 	const onSelectTab = () => {};
 
 	const onChangeBoardOrientation = (selectedOption) => {
@@ -375,6 +380,7 @@ export const Board = () => {
 					history={game.history({verbose:true})}
 					numMovements={movementsState}
 					configState={configState} 
+					onClickResetMatch={onClickResetMatch}
 					onSelectTab={onSelectTab} 
 					onChangeBoardOrientation={onChangeBoardOrientation} 
 					onChangeUpdateFreq={onChangeUpdateFreq} 
