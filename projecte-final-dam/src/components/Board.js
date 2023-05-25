@@ -32,7 +32,6 @@ export const Board = () => {
 		if (move === null) return false;
 		setTimeout(makeBestMove, 200); //Needed timeout to charge correctly the movement of the piece.
 
-		// 
 		if (gameOver) return false;
 		return true;
 	}
@@ -75,20 +74,17 @@ export const Board = () => {
 
 		updatePosition(positionsSearched);
 
-		if(configState.debugMode) console.log("Best Move: " + bestMove + "\nPosition Value: " + bestMoveValue + "\nMovement: " + movementsState);
+		if(configState.debugMode) console.log("Best Move: " + bestMove + "\nPosition Value: " + bestMoveValue + "\nMovement: " + (movementsState+1));
 		return bestMove;
 	}
 
 	// Board Logic
 	function evaluateBoard() {
-		let whiteScore = 0;
-		let blackScore = 0;
+		let whiteScore = 0, blackScore = 0, piece;
 		const square = SQUARES;
 
 		for (let i = 0; i < 64; i++) {
-			const piece = game.get(square[i]);
-
-			if (piece === null) continue;
+			if ((piece = game.get(square[i])) === null) continue;
 
 			const pieceValue = {
 				p: 1,
@@ -108,19 +104,18 @@ export const Board = () => {
 	}
 
 	function evaluateBonus(piece, square) {
-		if (piece === null) return 0;
-
-		var absoluteValue = getAbsoluteValue(piece.type, piece.color === 'w', (getNumByLetter(square[0]) - 1), square[1] - 1);
+		var absoluteValue = complexEvaluation(piece.type, piece.color === 'w', 
+												(getNumByLetter(square[0]) - 1), square[1] - 1);
 		return piece.color === 'w' ? absoluteValue : -absoluteValue;
 	};
 
-	function getAbsoluteValue(type, isWhite, x, y) {
+	function complexEvaluation(type, isWhite, x, y) {
 		var bonus = 0;
 		switch (type) {
 			case 'p': return (isWhite ? constants.pawnEvalWhite[y][x] : constants.pawnEvalBlack[y][x]);
 			case 'r':
 				if (game.moves({ square: getLetterByNum(y + 1) + x }).length >= 10) bonus = 0.5;
-				return (isWhite ? constants.rookEvalWhite[y][x] : constants.rookEvalBlack[y][x]);
+				return bonus + (isWhite ? constants.rookEvalWhite[y][x] : constants.rookEvalBlack[y][x]);
 			case 'n': return constants.knightEval[y][x];
 			case 'b':
 				if (game.moves({ square: getLetterByNum(y + 1) + x }).length >= 6) bonus = 0.5;
@@ -129,7 +124,6 @@ export const Board = () => {
 			case 'k':
 				bonus = getNearbyPieces(x + 1, y + 1, 2);
 				return bonus + (isWhite ? constants.kingEvalWhite[y][x] : constants.kingEvalBlack[y][x]);
-			default: return 0;
 		}
 	};
 
@@ -193,7 +187,6 @@ export const Board = () => {
 	}
 
 	function getNearbyPieces(x, y, range) {
-		// Get coords of the piece that it wants to examine.
 		var piecePosition = getLetterByNum(y) + x;
 		var coords = piecePosition;
 		var nearbyPieces = [];
@@ -359,6 +352,7 @@ export const Board = () => {
 	return (
 		<>
 			<div className='board'>
+				<div className='turn'>White WIN!</div>
 				<Chessboard className="board"
 					boardOrientation={configState.boardOrientation}
 					position={game.fen()}
@@ -366,7 +360,7 @@ export const Board = () => {
 					onMouseOverSquare={onMouseOverSquare}
 					onMouseOutSquare={onMouseOutSquare}
 					areArrowsAllowed={true}
-					customBoardStyle={{ border: '4px solid black' }}
+					customBoardStyle={{ border: '3px solid black' }}
 				/>
 			</div>
 			<div className='moduleBoard'>

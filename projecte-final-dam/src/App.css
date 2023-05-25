@@ -70,6 +70,16 @@
 	grid-area: 2 / 2 / 3 / 3;
 }
 
+.turn {
+	font-size: 18px;
+	font-weight: bold;
+	background-color: #b58863;
+	color: #ffffff;
+	border: 3px solid black;
+	border-bottom: none;
+	width: 100%;
+}
+
 /* INFO */
 .container {
 	width: 100%;
