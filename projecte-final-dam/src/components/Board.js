@@ -13,6 +13,7 @@ export const Board = () => {
 	const [gameOver, setGameOver] = useState(false);
 	const [configState, setConfigState] = useState(config);
 	const [movementsState, setMovementsState] = useState(0);
+	const [turn, setTurn] = useState("White's Turn");
 	const startPositionFen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 	var positionsSearched = [];
 
@@ -22,6 +23,7 @@ export const Board = () => {
 
 	//Board Interface
 	function onDrop(sourceSquare, targetSquare) {
+		setTurn("Black's Turn");
 		const move = makeAMove({
 			from: sourceSquare,
 			to: targetSquare,
@@ -50,7 +52,10 @@ export const Board = () => {
 		setGame(gameCopy);
 
 		// Detect if game is over
-		if (gameCopy.game_over()) setGameOver(true);
+		if (gameCopy.game_over()) {
+			setGameOver(true);
+			setTurn("Game Finished");
+		}
 
 		return result; //null if the move was illegal, the move object if the move was legal
 	}
@@ -63,18 +68,30 @@ export const Board = () => {
 		const isMaximizingPlayer = game.turn() === "w";
 		var bestMove, bestMoveValue;
 
-		if(configState.debugMode){
+		if (configState.debugMode) {
 			console.time('Time to Move');
 			[bestMove, bestMoveValue] = minimax(depth, alpha, beta, isMaximizingPlayer);
 			console.timeEnd('Time to Move'); //Calculation of the time spent to process the movement done.
-			console.log('Num of positions searched: '+positionsSearched.length);
-		}else{
+			console.log('Num of positions searched: ' + positionsSearched.length);
+		} else {
 			[bestMove, bestMoveValue] = minimax(depth, alpha, beta, isMaximizingPlayer);
 		}
 
 		updatePosition(positionsSearched);
+		// Verificar el estado de la partida
+		if (game.in_checkmate()) {
+			setTurn("CHECK MATE");console.log('¡Jaque mate!');
+		} else if (game.in_draw()) {
+			setTurn("DRAW");console.log('La partida ha terminado en empate.');
+		} else if (game.in_stalemate()) {
+			setTurn("STALEMATE");console.log('La partida ha terminado en jaque ahogado.');
+		} else if (game.in_threefold_repetition()) {
+			setTurn("DRAW BY REPETITION");console.log('La partida ha terminado en repetición de posición.');
+		} else if (game.insufficient_material()) {
+			setTurn("DRAW BY INSUFFICIENT MATERIAL");console.log('La partida ha terminado debido a material insuficiente.');
+		} else setTurn("White's Turn");
 
-		if(configState.debugMode) console.log("Best Move: " + bestMove + "\nPosition Value: " + bestMoveValue + "\nMovement: " + (movementsState+1));
+		if (configState.debugMode) console.log("Best Move: " + bestMove + "\nPosition Value: " + bestMoveValue + "\nMovement: " + (movementsState + 1));
 		return bestMove;
 	}
 
@@ -104,8 +121,8 @@ export const Board = () => {
 	}
 
 	function evaluateBonus(piece, square) {
-		var absoluteValue = complexEvaluation(piece.type, piece.color === 'w', 
-												(getNumByLetter(square[0]) - 1), square[1] - 1);
+		var absoluteValue = complexEvaluation(piece.type, piece.color === 'w',
+			(getNumByLetter(square[0]) - 1), square[1] - 1);
 		return piece.color === 'w' ? absoluteValue : -absoluteValue;
 	};
 
@@ -140,11 +157,11 @@ export const Board = () => {
 		/*If the quantity of legal movements is above 27 they are divided by 3, if it is between 16(not included) and 27(included) they are divided by 2 and if it is under 16(included) they are not divided.
 		This is done to simplify calculation for the best move because the quantity of movements is enormous and is so difficult to optimize the application.
 		It is not possible to always get the best move, but it has a not that bad move in a faster time. */
-		if(configState.reduceIterations){
+		if (configState.reduceIterations) {
 			const possibleMoves = game.moves();
 			var iterations = (possibleMoves.length > 16) ? ((possibleMoves.length > 27) ? possibleMoves.length / 3 : possibleMoves.length / 2) : possibleMoves.length;
 			randomMoves = shuffle(possibleMoves).slice(0, iterations);
-		}else{
+		} else {
 			randomMoves = game.moves();
 		}
 
@@ -152,7 +169,7 @@ export const Board = () => {
 			game.move(randomMoves[i]);
 			//Show by console the movements that are being calculated.
 
-			if(configState.showAscii) console.log(game.ascii());
+			if (configState.showAscii) console.log(game.ascii());
 
 			//Evaluate next position
 			const [_, value] = minimax(depth - 1, alpha, beta, !isMaximizingPlayer);
@@ -302,7 +319,7 @@ export const Board = () => {
 	};
 
 	// Info & Configuration
-	const onSelectTab = () => {};
+	const onSelectTab = () => { };
 
 	const onChangeBoardOrientation = (selectedOption) => {
 		setConfigState((prevConfig) => ({
@@ -352,7 +369,7 @@ export const Board = () => {
 	return (
 		<>
 			<div className='board'>
-				<div className='turn'>White WIN!</div>
+				<div className='turn'>{turn}</div>
 				<Chessboard className="board"
 					boardOrientation={configState.boardOrientation}
 					position={game.fen()}
@@ -364,20 +381,20 @@ export const Board = () => {
 				/>
 			</div>
 			<div className='moduleBoard'>
-				<ModuleBoard 
-					position={position} 
-					configState={configState} 
+				<ModuleBoard
+					position={position}
+					configState={configState}
 				/>
 			</div>
 			<div className='info'>
-				<Info 
-					history={game.history({verbose:true})}
+				<Info
+					history={game.history({ verbose: true })}
 					numMovements={movementsState}
-					configState={configState} 
+					configState={configState}
 					onClickResetMatch={onClickResetMatch}
-					onSelectTab={onSelectTab} 
-					onChangeBoardOrientation={onChangeBoardOrientation} 
-					onChangeUpdateFreq={onChangeUpdateFreq} 
+					onSelectTab={onSelectTab}
+					onChangeBoardOrientation={onChangeBoardOrientation}
+					onChangeUpdateFreq={onChangeUpdateFreq}
 					onChangeDepth={onChangeDepth}
 					onChangeReduceIterations={onChangeReduceIterations}
 					onChangeShowAscii={onChangeShowAscii}
