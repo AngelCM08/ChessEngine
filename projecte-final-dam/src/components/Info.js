@@ -7,10 +7,18 @@ export const Info = ({ history, numMovements, onClickResetMatch, onSelectTab, on
     const joinedHistory = sans.join(', ');
 
     //Modals
+    const modalRefBoardOrientation = useRef(null);
     const modalRefUpdateFreq = useRef(null);
     const modalRefDepth = useRef(null);
     const modalRefCapModule = useRef(null);
+    const modalRefShowAscii = useRef(null);
     const modalRefDebugMode = useRef(null);
+
+    const openModalBoardOrientation = () => {
+        if (modalRefBoardOrientation.current) {
+            modalRefBoardOrientation.current.openModal();
+        }
+    };
 
     const openModalUpdateFreq = () => {
         if (modalRefUpdateFreq.current) {
@@ -27,6 +35,12 @@ export const Info = ({ history, numMovements, onClickResetMatch, onSelectTab, on
     const openModalCapModule = () => {
         if (modalRefCapModule.current) {
             modalRefCapModule.current.openModal();
+        }
+    };
+
+    const openModalShowAscii = () => {
+        if (modalRefShowAscii.current) {
+            modalRefShowAscii.current.openModal();
         }
     };
 
@@ -104,7 +118,7 @@ export const Info = ({ history, numMovements, onClickResetMatch, onSelectTab, on
                             <tr>
                                 <td>
                                     <div className='select'>
-                                        <label>Board Orientation</label>
+                                        <label><i className="fa fa-question-circle" onClick={openModalBoardOrientation}></i> Board Orientation</label>
                                         <select value={configState.boardOrientation} onChange={handleBoardOrientation}>
                                             <option value="white">White</option>
                                             <option value="black">Black</option>
@@ -166,7 +180,7 @@ export const Info = ({ history, numMovements, onClickResetMatch, onSelectTab, on
                                 <td className='separator'></td>
                                 <td>
                                     <div className='select'>
-                                        <label>Show Ascii</label>
+                                        <label><i className="fa fa-question-circle" onClick={openModalShowAscii}></i> Show Ascii</label>
                                         <select value={configState.showAscii} onChange={handleShowAscii}>
                                             <option value="true">Sí</option>
                                             <option value="false">No</option>
@@ -188,6 +202,9 @@ export const Info = ({ history, numMovements, onClickResetMatch, onSelectTab, on
                     </table>
                 </div>
             </div>
+            <Modal ref={modalRefBoardOrientation}>
+                <p>This option allows you to see the current state of the board from the side of the black player.</p>
+            </Modal>
 
             <Modal ref={modalRefUpdateFreq}>
                 <p>Shows X final positions per second on module chessboard.</p>
@@ -201,8 +218,13 @@ export const Info = ({ history, numMovements, onClickResetMatch, onSelectTab, on
                 <p>This option cuts randomly move options making the module faster but with the lack of accuracy.</p>
             </Modal>
 
+            <Modal ref={modalRefShowAscii}>
+                <p>It allows you to see different data about the operation of the module in real time through the browser console.</p>
+            </Modal>
+
+
             <Modal ref={modalRefDebugMode}>
-                <p>xxx.</p>
+                <p>When the user makes a move, the positions that the module is calculating in real time will be displayed in Ascii format through the browser console.</p>
             </Modal>
         </div>
     );
